@@ -1,0 +1,116 @@
+0: year(n1) | old(j) | student(n1) | private(j-jn) | baptist(n1) | school(n1) | alleged(av-j) | kill(vvn) | one(crd) | teacher(n1) | wound(vvn) | anoth(j-jn) | fire(vvg) | fill(vvd) | classroom(n1) | apparent(av-j) | just(av-j) | snap(vvn) | school(n1) | pastor(n1) | say(vvd) | 
+1: don(n1) | know(vvb) | happen(vvd) | say(vvn) | pastor(n1) | 
+2: sophomore(av) | arrest(vvd) | charge(vvn) | first(ord) | degree(n1) | murder(n1) | attempt(vvd) | murder(n1) | malicious(j) | assault(n1) | relate(vvd) | felony(n1) | charge(vvz) | friday(n1) | morning(n1) | shoot(vvg) | 
+3: police(n1) | release(n1) | boy(n1) | name(vvi) | juvenile(j-jn) | neighbor(n2) | relative(n2) | identify(vvn) | 
+4: police(n1) | say(vvd) | student(n1) | tackle(j-vvn) | teacher(n1) | student(n2) | semiautomatic(j) | pistol(n1) | jam(vvn) | fire(vvn) | classroom(n1) | student(n2) | cowere(vvd) | floor(n1) | cry(vvg) | jesus(p-acp) | save(vvi) | 
+5: friend(n2) | family(n1) | say(vvd) | boy(n1) | apparent(av-j) | trouble(j-vvn) | grandmother(n1) | death(n1) | divorce(n1) | parent(n2) | torment(vvn) | classmate(n2) | 
+6: grandfather(n1) | say(vvd) | saturday(av-an) | boy(n1) | parent(n2) | separate(vvn) | four(crd) | year(n2) | ago(av) | maternal(j) | grandmother(n1) | die(vvd) | last(ord) | year(n1) | long(av-j) | illness(n1) | 
+7: grandfather(n1) | also(av) | say(vvd) | grandson(n1) | fascinate(vvn) | gun(n2) | 
+8: boy(n1) | always(av) | talk(vvg) | gun(n2) | say(vvd) | 
+9: know(vvd) | name(n2) | none(pix) | little(j) | gun(n2) | like(vvb) | nothing(pix) | like(vvi) | 
+10: wound(j-vvn) | teacher(n1) | year(n1) | old(j) | sam(fw-ge) | marino(fw-it) | serious(j) | condition(n1) | saturday(av-an) | gunshot(n1) | wound(n2) | shoulder(n1) | 
+11: police(n1) | say(vvd) | boy(n1) | also(av) | shoot(vvd) | third(ord) | teacher(n1) | flee(vvd) | room(n1) | marino(fw-it) | shoot(vvn) | 
+12: shoot(vvn) | marino(fw-it) | run(vvg) | third(ord) | classroom(n1) | bible(n1) | class(n1) | meet(vvg) | 
+13: youngster(n1) | shoot(vvd) | glass(n1) | lock(vvd) | door(n1) | open(vvg) | fire(n1) | police(n1) | spokesman(n1) | say(vvd) | 
+14: youth(n1) | pistol(n1) | jam(vvn) | tackle(j-vvn) | teacher(n1) | student(n2) | say(vvd) | 
+15: see(vvb) | go(vvd) | miracle(n1) | didn(vvg) | people(n1) | kill(vvd) | police(n1) | chief(j-jn) | say(vvd) | 
+16: police(n1) | didn(vvg) | motive(n1) | say(vvd) | believe(vvi) | boy(n1) | primary(j) | target(n1) | teacher(n1) | classmate(n1) | 
+17: officer(n2) | find(vvd) | appear(vvn) | three(crd) | molotov(crd) | cocktail(n2) | boy(n1) | locker(n1) | confiscate(vvd) | gun(n1) | several(j) | spend(vvn) | shell(n1) | casing(n2-vvg) | 
+18: fourteen(crd) | round(n2) | fire(vvn) | gun(n1) | jam(vvn) | say(vvd) | 
+19: gun(n1) | boy(n1) | carry(vvd) | school(n1) | knapsack(n1) | purchase(vvd) | adult(n1) | youngster(n1) | request(n1) | say(vvd) | add(vvg) | authority(n2) | interview(vvd) | adult(n1) | whose(r-crq) | name(n1) | withhold(vvn) | pend(vvg) | investigation(n1) | federal(j) | bureau(n1) | alcohol(fw-mi) | tobacco(n1) | firearm(n2) | 
+20: shooting(n2-vvg) | occur(vvn) | complex(n1) | four(crd) | portable(j) | classroom(n2) | junior(n1) | senior(n1) | high(j) | school(n1) | student(n2) | outside(av-an) | main(n1) | building(n1) | year(n1) | old(j) | school(n1) | 
+21: police(n1) | say(vvd) | try(vvg) | reconstruct(vvi) | sequence(n1) | event(n2) | resolve(vvd) | shot(n1) | first(ord) | 
+22: body(n1) | farley(n1) | find(vvd) | hour(n1) | shooting(n2-vvg) | behind(p-acp) | classroom(n1) | door(n1) | 
+23: just(av-j) | two(crd) | day(n2) | event(n1) | quarterfinal(n2) | yet(av) | play(vvn) | championship(n1) | already(av) | one(crd) | memorable(j) | tournament(n2) | year(n1) | 
+24: thril(j-vvg) | game(n2) | stun(j-vvg) | comeback(n2) | abound(vvn) | naniwa(av) | abrupt(j) | forfeiture(n1) | steal(vvd) | show(n1) | make(vvd) | march(n1) | day(n1) | esport(vvz) | history(n1) | 
+25: naniwa(crd) | disinterest(n1) | starcraft(n1) | well(av) | know(vvn) | tournament(n1) | expect(vvd) | swedish(j) | protoss(n1) | player(n1) | put(vvd) | token(n1) | resistance(n1) | specialist(n1) | cmstorm_polt(n1) | match(n1) | 
+26: however(p-acp) | thing(n2) | quick(av-j) | take(vvd) | dramatic(j) | turn(n1) | polt(n1) | scout(vvn) | naniwa(crd) | proxy(n1) | gateway(n1) | game(n1) | one(crd) | vod(n1) | 
+27: complaint(n2) | soundproof(n-vvg) | lead(n1) | quick(av-j) | naniwa(av) | eventual(av-j) | result(vvn) | sudden(j) | mid(j-jn) | series(n1) | forfeiture(n1) | detail(n2) | 
+28: internet(n1) | soon(av) | abuzz(j) | discussion(n1) | naniwa(crd) | action(n1) | shadow(n1) | forfeiture(n1) | lingere(vvd) | rest(n1) | proceeding(n2-vvg) | 
+29: liquid(j-jn) | taeja(n1) | shock(vvn) | many(d) | idra(fw-fr) | esque(fw-fr) | early(j) | surrender(n1) | timing(n2) | february(j) | asus(p-acp) | rog(n1) | winter(n1) | continue(vvd) | afflict(vvn) | mental(j) | malaise(n1) | face(vvd) | myi(crd) | stardust(n1) | 
+30: taeja(p-acp) | quick(av-j) | go(vvd) | series(n1) | vod(n2) | abrupt(av-j) | surrendere(vvg) | game(n2) | stardust(n1) | gain(vvd) | marginal(j) | advantage(n1) | 
+31: loss(n1) | put(vvd) | taeja(dx) | center(n1) | fiasco(fw-la) | rival(n1) | naniwa(av) | manage(vvd) | recover(vvi) | sense(n2) | time(n1) | score(n1) | comeback(n1) | 
+32: despite(p-acp) | feature(vvg) | two(crd) | bizarre(n1) | incident(n2) | day(n1) | two(crd) | book(n1) | end(vvd) | series(n1) | notable(j) | excit(vvg) | starcraft(n1) | play(vvd) | 
+33: roccat(n1) | hyun(vvb) | near(av-j) | score(vvn) | massive(j) | upset(vvi) | cj_hero(n1) | open(vvg) | series(n1) | day(n1) | gree(vvd) | mass(n1) | unit(vvz) | threaten(vvn) | overwhelm(vvi) | two(crd) | time(n1) | iem(n1) | championship(n1) | 
+34: however(p-acp) | hyun(n1) | blow(vvd) | chance(n1) | close(av-j) | series(n1) | make(vvd) | mistake(n1) | give(vvg) | combat(n1) | hero(n1) | game(n1) | continue(vvd) | backstab(n1) | attempt(n2) | sure(av-j) | win(vvn) | game(n1) | 
+35: instead(av) | hero(n1) | able(j) | use(n1) | excellent(j) | blink(vvi) | micro(n1) | destroy(vvi) | hyun(pi) | overconfident(j) | army(n1) | tie(n1) | series(n1) | 
+36: hero(n1) | blink(vvi) | micro(av) | shine(vvd) | fifth(ord) | final(j) | set(n1) | two(crd) | base(n1) | blink(vvi) | stalker(n1) | much(d) | hyun(n1) | overcome(vvn) | 
+37: final(j) | series(n1) | day(n1) | cmstorm_revival(n1) | myi(crd) | jjakji(crd) | 
+38: give(vvd) | day(n1) | two(crd) | perfect(j) | end(n-vvg) | 
+39: come(vvg) | tournament(n1) | one(crd) | shroud(vvn) | participant(n2) | revival(n1) | pull(vvd) | ahead(av) | lead(vvb) | strong(j) | muta(fw-la) | ling(n1) | play(n1) | 
+40: one(crd) | game(n1) | away(av) | elimination(n1) | jjakji(pns11) | decide(vvd) | put(vvn) | faith(n1) | mechanic(n1) | terran(n1) | style(n1) | heavy(j) | rain(n1) | 
+41: ensue(vvn) | game(n1) | extreme(av-jn) | reminiscent(j) | excellent(j) | game(n1) | play(vvd) | hyun(vvn) | jjakji(crd) | week(n2) | early(av-jc) | seatstory(n1) | cup(n1) | game(n1) | jjakji(crd) | mech(n1) | fall(vvd) | apart(av) | fight(vvg) | eighty(crd) | gruel(vvg) | minute(n2) | 
+42: much(av-d) | short(jc) | game(n1) | see(vvd) | revival(n1) | lose(vvi) | near(av-j) | two(crd) | hundred(crd) | mutalisk(n2) | jjakji(pns11) | flip(vvd) | script(n1) | outlast(vvn) | opponent(n1) | 
+43: win(vvb) | tie(vvd) | series(n1) | jjakji(pns11) | find(vvd) | need(vvg) | one(crd) | miracle(n1) | advance(vvi) | 
+44: revival(n1) | great(j) | muta(fw-la) | ling(n1) | play(vvi) | much(d) | jjakji(crd) | yet(av) | game(n1) | five(crd) | look(vvn) | cruise(vvg) | toward(p-acp) | quarterfinal(j-jn) | berth(n1) | huge(j) | pack(n1) | mutalisk(n2) | control(vvn) | map(n1) | 
+45: however(p-acp) | game(n1) | instant(av-jn) | turn(vvn) | around(a-acp) | revival(n1) | fly(vvd) | mutalisk(n2) | straight(av-j) | jjakji(crd) | widow(n1) | mine(po11) | trap(n1) | lose(vvg) | dozens(crd) | supply(n1) | instant(j-jn) | 
+46: revival(n1) | unable(j) | recover(vvi) | sudden(j) | loss(n1) | army(n1) | force(vvd) | surrender(n1) | painstaking(n1) | jjakji(pns11) | 
+47: day(n1) | two(crd) | iem(n1) | also(av) | feature(vvn) | several(j) | high(j) | level(j) | protoss(n1) | protoss(n1) | series(n1) | unfortunate(av-j) | overshadow(vvn) | game(n1) | game(n1) | drama(n1) | series(n1) | 
+48: result(n2) | series(n1) | most(av-ds) | unsurprising(j) | player(n2) | better(vvi) | recent(j) | form(n1) | advance(vvn) | 
+49: take(vvn) | hero(n1) | sos(fw-la) | eliminate(vvn) | reach(vvi) | quarterfinal(n2-jn) | 
+50: championship(n1) | will(vmb) | continue(vvi) | day(n1) | three(crd) | beginning(n1) | final(j) | match(n1) | life(n1) | rogue(n1) | delay(vvd) | due(j-jn) | schedule(n1) | overrun(vvn) | 
+51: afterward(av) | entire(j) | quarter(n1) | semifinal(j) | bracket(n2) | will(vmb) | play(vvd) | leave(vvg) | grand(j) | final(n2) | play(vvd) | sunday(n1) | 
+52: kuala(n1) | lumpur(vvb) | investigation(n1) | disappearance(n1) | flight(n1) | shift(vvn) | include(vvi) | anyone(pi) | board(n1) | navigation(n1) | aircraft(n1) | background(n1) | response(n1) | evidence(n1) | plane(n1) | deliberate(av-j) | divert(vvn) | route(n1) | communication(n1) | lose(vvn) | navigate(vvd) | someone(av-j) | deep(j-jn) | experience(n1) | control(vvz) | 
+53: view(vvi) | late(js) | development(n1) | authority(n2) | refocuse(vvn) | investigation(n1) | crew(n1) | passenger(n2) | board(n1) | prime(j-jn) | minister(n1) | malaysia(n1) | say(vvd) | news(n1) | conference(n1) | saturday(av-an) | 
+54: continue(vvb) | read(vvg) | main(j) | story(n1) | coverage(n1) | japanese(d) | crew(n2) | search(vvd) | miss(vvg) | flight(n1) | water(n2) | south(n1) | saturday(av-an) | malaysia(n1) | official(n2-jn) | open(j) | criminal(j-jn) | inquiry(n1) | miss(j-vvg) | jetmarch(n1) | new(j) | phase(n1) | investigation(n1) | bring(vvd) | new(j) | scrutiny(n1) | live(vvz) | two(crd) | people(n1) | certain(av-j) | skill(vvz) | pilot(n1) | first(ord) | officer(n1) | capt(vvd) | 
+55: zaharie(n1) | ahmad(j) | shah(pns21) | fariq(fw-fr) | citizen(n2) | although(cs) | neither(av-dx) | declare(j-vvn) | suspect(n1) | plane(n1) | disappearance(n1) | 
+56: investigator(n2) | also(av) | apparent(av-j) | search(vvg) | passenger(n1) | list(vvb) | anyone(pi) | else(av) | similar(j) | skill(n2) | may(vmd) | rerout(n-vvn) | plane(n1) | willful(av-j) | coercion(n1) | 
+57: news(n1) | conference(n1) | investigator(n2) | search(vvd) | zaharie(n1) | house(n1) | first(ord) | time(n1) | since(c-acp) | plane(n1) | disappear(vvd) | accord(vvg) | news(n1) | report(n2) | 
+58: authority(n2) | may(vmb) | also(av) | look(vvg) | aviation(n1) | engineer(n1) | among(p-acp) | passenger(n2) | 
+59: new(j) | strait(n2) | times(p-acp) | newspaper(n1) | publish(vvd) | interview(vvn) | man(n1) | say(vvd) | son(n1) | aircraft(n1) | engineer(n1) | flight(n1) | route(n1) | work(n1) | airline(n2) | plane(n2) | 
+60: son(n1) | identify(vvd) | passenger(n1) | manife(j) | year(n1) | old(j) | malaysian(n1) | 
+61: company(n1) | spokeswoman(n1) | say(vvd) | early(j) | sunday(n1) | passenger(n1) | employee(vvi) | private(j-jn) | jet(n1) | firm(j) | 
+62: friend(n2) | relative(n2) | pilot(n1) | first(ord) | officer(n1) | jump(vvd) | defense(j) | deplore(j-vvg) | suggestion(n1) | may(vmd) | role(n1) | plane(n1) | disappearance(n1) | vouch(vvg) | integrity(n1) | 
+63: difficult(j) | accept(vvi) | line(n1) | think(vvd) | lean(vvg) | toward(p-acp) | terrorism(n1) | friend(n1) | zaharie(n1) | say(vvd) | interview(n1) | saturday(av-an) | 
+64: know(n-vvg) | know(n-vvg) | character(n1) | find(vvi) | difficult(j) | accept(vvi) | 
+65: chong(n1) | describe(vvd) | zaharie(n1) | friendly(j) | jovial(j) | love(n2) | people(n1) | enjoy(vvz) | people(n1) | doesn(p-acp) | get(vvi) | angry(j) | easy(av-j) | 
+66: zaharie(fw-fr) | join(vvd) | airline(n1) | log(vvn) | hour(n2) | flight(n1) | time(n1) | accord(vvg) | employer(n1) | 
+67: passionate(j) | fly(j-vvg) | chong(n1) | say(vvd) | build(vvn) | flight(n1) | simulator(n1) | home(n1-an) | gate(vvn) | complex(n1) | suburb(n1) | west(n1) | kuala(n1) | lumpur(vvb) | capital(j) | 
+68: facebook(n1) | page(n1) | apparent(av-j) | create(vvn) | zaharie(n1) | show(vvz) | photos(fw-gr) | simulator(n1) | small(av-j) | remote(j) | aircraft(n1) | report(av-vvn) | belong(vvd) | 
+69: motion(n1) | apparent(av-j) | write(vvd) | post(vvg) | web(n1) | forum(fw-la) | motion(n1) | simulator(n1) | aficionado(vbds) | 
+70: friday(n1) | chief(j-jn) | executive(j-jn) | ahmad(j) | jauhari(fw-fr) | yahya(n1) | ask(vvd) | report(n2) | one(crd) | pilot(n2) | keep(vvd) | flight(n1) | simulator(n1) | home(av-an) | 
+71: far(av-j) | pilot(n2) | concern(vvn) | everyone(pi) | actual(av-j) | free(j) | hobby(n1) | reply(vvd) | 
+72: quite(av) | pilot(n2) | flight(n1) | simulator(n2) | home(av-an) | 
+73: photos(fw-gr) | facebook(n1) | show(vvi) | zaharie(n1) | cook(vvg) | report(av-vvn) | passionate(j) | chef(fw-fr) | 
+74: also(av) | curate(vvd) | youtube(n1) | channel(n1) | video(r-crq) | guide(vvz) | affable(av-j) | patient(av-j) | demonstrate(vvn) | home(av-an) | maintenance(n1) | task(n2) | include(vvg) | repair(j-vvg) | ice(n1) | maker(n1) | refrigerator(n1) | tune(vvg) | air(n1) | conditioner(n2) | save(p-acp) | money(n1) | 
+75: tru(av-j) | good(j) | heart(n1) | write(vvd) | author(n1) | tribute(n1) | page(n1) | create(vvn) | last(ord) | week(n1) | pilot(n1) | 
+76: less(av-dc) | public(av-j) | know(vvn) | fariq(fw-fr) | also(av) | cockpit(fw-la) | flight(n1) | take(vvd) | march(n1) | 
+77: according(p-acp) | join(vvn) | company(n1) | log(vvn) | hour(n2) | flight(n1) | time(n1) | 
+78: tribute(n1) | page(n1) | set(vvd) | flight(n1) | crew(n1) | quote(vvz) | grandmother(n1) | call(vvg) | good(j) | son(n1) | obedient(j) | respect(n1) | elder(n2-jn) | pious(j) | man(n1) | 
+79: neighbor(n2) | say(vvd) | like(vvn) | play(n1) | futsal(n1) | sport(vvi) | similar(j) | soccer(n1) | popular(j) | engage(vvn) | marry(vvn) | according(p-acp) | 
+80: fariq(fw-fr) | track(n1) | record(n1) | come(vvi) | scrutiny(n1) | recent(j) | day(n2) | woman(n1) | claim(vvd) | anoth(j-jn) | captain(n1) | bring(vvd) | friend(n1) | ride(vvi) | cockpit(j) | flight(n1) | kuala(n1) | lumpur(n1) | 
+81: provide(vvn) | television(n1) | program(n1) | current(n1) | affair(n1) | photo(n2) | man(n1) | identify(vvd) | fariq(fw-fr) | 
+82: two(crd) | woman(n2) | cockpit(vvb) | takeoff(j) | land(n-vvg) | say(vvd) | 
+83: throughout(p-acp) | whole(j-jn) | flight(n1) | talk(vvg) | say(vvd) | interview(n1) | program(n1) | 
+84: comment(n2) | reporter(n2) | saturday(av-an) | prime(n-jn) | minister(n1) | explain(vvn) | aircraft(n1) | communication(n2) | system(n2) | systematical(av-j) | disable(vvn) | perhaps(av) | someone(av-j) | intimate(j) | knowledge(n1) | plane(n1) | 
+85: say(j-vvn) | one(crd) | system(n1) | disable(vvn) | plane(n1) | fly(vvd) | northeast(n1) | coast(n1) | second(ord) | transponder(n1) | disable(vvn) | minute(n2) | late(jc) | 
+86: aircraft(n1) | altere(j-vvn) | course(n1) | fly(vvd) | mainland(av-j) | turn(vvg) | northwest(n1) | head(vvg) | open(j) | sea(n1) | 
+87: action(n2) | consistent(j) | deliberate(j) | action(n1) | someone(vvn) | plane(n1) | say(vvd) | 
+88: addition(n1) | military(j) | radar(n1) | data(fw-la) | provide(vvn) | person(n1) | familiar(j-jn) | investigation(n1) | sug(vvi) | someone(pix) | may(vmb) | pilote(vvd) | aircraft(n1) | high(j) | foot(n2) | foot(n1) | ceiling(n1) | 
+89: current(j) | pilot(n1) | asian(n1) | base(vvn) | airline(n1) | say(vvd) | move(n1) | intend(vvd) | depressurize(n1) | cabin(n1) | render(vvi) | passenger(n2) | crew(n1) | unconscious(j) | prevent(vvg) | alert(vvg) | people(n1) | ground(n1) | cellphone(n2) | 
+90: incapacitate(vvi) | carry(vvi) | plan(n1) | uninterrupted(j) | pilot(n1) | say(vvd) | 
+91: can(vmb) | count(vvi) | one(crd) | hand(n1) | thing(n2) | know(vvi) | tavvy(fw-mi) | 
+92: tavvy(fw-mi) | real(j) | name(vvi) | anybody(pi) | else(av) | matter(n1) | ever(av) | call(vvn) | 
+93: next(ord) | house(n1) | come(vvg) | town(n1) | close(j) | neighbor(n2) | nothing(pix) | new(j) | get(vvi) | penny(n1) | dige(vvi) | mistake(n1) | mail(n1) | 
+94: way(n1) | ever(av) | know(vvd) | first(ord) | last(n1) | name(n2) | ouida(fw-it) | rolan(n1) | 
+95: ring(vvb) | finger(n1) | never(av-x) | anything(pi) | worth(j) | anything(pi) | one(pi) | sister(n1) | drown(vvn) | fourteen(crd) | say(n1) | fourteen(crd) | accord(vvg) | julette(n1) | sensitive(j) | age(n1) | remind(vvg) | around(a-acp) | turn(vvd) | half(j-jn) | age(n2) | follow(vvg) | sentence(n1) | julette(n1) | receive(vvd) | heart(n1) | shabaha(r-crq) | county(n1) | wide(j) | revival(n1) | thirteen(crd) | half(j-jn) | 
+96: swear(vvb) | thousand(crd) | gideon(n2) | friend(n1) | almost(av) | drown(vvn) | one(crd) | time(n1) | visit(vvg) | aunt(n1) | debalk(vvi) | 
+97: wasn(p-acp) | know(vvi) | wasn(c-crq) | know(vvn) | lie(n1) | much(av-d) | 
+98: say(vvd) | good(av-js) | thing(n1) | ever(av) | happen(vvn) | 
+99: soft(j) | quiet(j-jn) | slow(j) | head(n1) | full(av-j) | christmase(vvz) | banana(n1) | pudding(n1) | think(vvb) | gross(j) | depress(vvn) | even(av-j) | last(ord) | think(vvd) | left(j) | earth(n1) | final(j) | minute(n1) | last(vvi) | possible(j) | breath(n1) | choctaw(n1) | always(av) | also(av) | debalk(vvi) | sit(vvg) | water(n1) | boat(n2) | drink(vvg) | can(n1) | can(vmb) | jax(vvi) | pull(vvn) | side(n1) | boat(n1) | scrape(j-vvg) | long(av-j) | single(j) | scar(n1) | whole(j-jn) | length(n1) | arm(n1) | piece(n1) | metal(n1) | jut(j-vvg) | boat(n1) | live(vvd) | 
+100: plus(fw-fr) | save(vvd) | real(j) | live(j) | choctaw(n1) | make(vvd) | little(j) | bit(n1) | jealous(j) | 
+101: say(vvd) | never(av-x) | hear(vvd) | tell(vvi) | peaceful(j) | drown(j-vvg) | 
+102: far(av-j) | concern(vvn) | according(p-acp) | volume(n1) | encyclopedia(fw-la) | brittanica(n2) | happen(vvb) | know(vvi) | keep(vvd) | reason(n1) | old(j) | box(n1) | back(av) | hall(n1) | closet(n1) | research(n1) | wise(j) | since(c-acp) | afraid(j) | computer(n1) | say(vvb) | drown(vvg) | well(av) | don(n1) | real(av-j) | talk(vvi) | term(n2) | good(j) | versus(p-acp) | bad(j) | 
+103: though(c-acp) | say(vvb) | record(n1) | take(vvd) | someone(j) | hour(n1) | drow(vvi) | complete(av-j) | 
+104: sure(av-j) | know(vvb) | particular(av-j) | far(j) | scientist(n1) | 
+105: encyclopedias(av) | old(j) | gumbo(n1) | mud(n1) | chance(vvz) | information(n1) | good(j) | anymore(n1) | 
+106: chance(n2) | people(n1) | drown(j-vvg) | lot(n1) | fast(jc) | day(n2) | 
+107: find(vvn) | encyclopedias(av) | accident(n1) | actual(av-j) | look(vvg) | stilt(n2) | know(vvd) | also(av) | keep(vvn) | back(av) | closet(n1) | much(d) | can(vmb) | tell(vvi) | stilt(n2) | right(vvi) | now(av) | 
+108: sure(av-j) | always(av) | careful(j) | handle(vvg) | encyclopedia(n2) | think(vvb) | may(vmb) | antiques(n2-j) | 
+109: every(d) | time(n1) | pick(vvi) | volume(n1) | though(c-acp) | rub(n1) | bumpy(j) | leather(n1) | cover(vvi) | something(pi) | shoot(vvz) | like(av-j) | lightning(n1) | feel(vvz) | like(av-j) | steal(vvg) | 
+110: also(av) | happen(vvb) | know(vvb) | story(n1) | julette(n1) | drown(vvg) | heart(n1) | frequent(av-j) | appear(vvz) | dead(j) | set(n1) | let(vvg) | something(pi) | want(vvi) | 
+111: parable(n1) | guess(vvb) | parent(n2) | around(a-acp) | double(vvn) | uncle(n1) | raise(vvg) | guess(n1) | mom(p-acp) | dad(n1) | 
+112: story(n1) | go(vvz) | stole(n1) | bottle(n1) | daddy(n1) | peppermint(n1) | whisky(j) | keep(vvn) | croup(n1) | 
+113: stole(n1) | straight(av-j) | medicine(n1) | cabinet(n1) | downstair(av-an) | bathroom(n1) | full(j) | cabinet(n1) | sink(vvi) | one(pi) | 
+114: defense(vvb) | anything(pi) | like(av-j) | bathroom(n1) | cabinet(n2) | wasn(p-acp) | cabinet(n1) | lock(vvn) | suppose(vvi) | didn(vvg) | die(n1) | thief(n1) | maybe(av) | father(n1) | stay(vvd) | sick(j) | often(av) | take(vvd) | lock(n1) | don(n1) | know(vvi) | 
+115: nee(vvb) | know(vvb) | couple(n1) | friend(n2) | take(vvd) | whole(j-jn) | bottle(n1) | go(vvd) | death(n1) | pier(n1) | pond(n1) | tavvy(fw-mi) | tow(vvi) | 
