@@ -207,7 +207,7 @@ public class TextProcessor {
 						// if person names found - remove
 						if(nameSpans.length > 0) {
 					    	System.out.println("Found person entities: " + Arrays.toString(Span.spansToStrings(nameSpans, tokens)));
-					    	String[] names = Span.spansToStrings(nameSpans, tokens);			    	
+					    	String[] names = Span.spansToStrings(nameSpans, tokens);	
 					    	for(String name : names)
 					    		sentence = StringUtils.replaceFirst(sentence, name, "");
 					    }

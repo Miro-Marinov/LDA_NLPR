@@ -8,7 +8,10 @@ import edu.northwestern.at.morphadorner.corpuslinguistics.adornedword.AdornedWor
 
 
 public class SimpleLDA {
-    private final Integer iter = 4000;
+    
+	private static boolean dbg = false;
+	
+	private final Integer iter = 10000;
 	
 	private  Integer K; //number of clusters
     private  Integer A;
@@ -16,10 +19,8 @@ public class SimpleLDA {
     private  Integer N;
     
 	private List<Cluster> clusters;
-	private HashMap<AdornedWord, Integer> clusterMap; // word -> clusterId
-	private HashMap<AdornedWord, Integer> sentenceMap; // word -> sentenceID
 	private TextProcessor textProcessor;
-	private List<List<AdornedWord>> sentences;
+	List<ProcessedSentence> pSentences;
 	
 	private HashSet<String> globalWordSet;
 	
@@ -38,41 +39,65 @@ public class SimpleLDA {
 			clusters.add(new Cluster());
 		
 		textProcessor = new TextProcessor();
-		clusterMap = new HashMap<>();
-		sentenceMap = new HashMap<>();
 		globalWordSet = new HashSet<>();
 		
-		sentences = textProcessor.processDocuments(documentFiles, "processedSentencesLDA.txt", "stopwords.txt");
+		List<List<AdornedWord>> adornedSentences = textProcessor.processDocuments(documentFiles, "processedSentencesLDA.txt", "stopwords.txt");
+		pSentences = new ArrayList<>();
 		
+		System.out.println("\n\nInitial random cluster assignment..");
 		Random randGen = new Random();
 		Integer sentenceID = 0;
-		for(List<AdornedWord> sentence : sentences){
+		
+		for(List<AdornedWord> sentence : adornedSentences){
+			ProcessedSentence pSentence = new ProcessedSentence();
 			for(AdornedWord word : sentence) {
 				Integer randomCluster = randGen.nextInt(K); // gives me a random cluster of a word
-				sentenceMap.put(word, sentenceID);
-				putWord (word, randomCluster);
+				String lemmata = word.getLemmata();
+				ProcessedWord pWord = new ProcessedWord(lemmata, word.getPartsOfSpeech(), sentenceID, randomCluster);
+				pSentence.words.add(pWord);
+				
+				putWord (pWord, randomCluster, pSentence);
+				
+				
 				N++;
-				globalWordSet.add(word.getLemmata()); // set of all the words (as strings)
+				globalWordSet.add(lemmata); // set of all the words (as strings)
 				
 			}
+			sentenceID++;
+			pSentences.add(pSentence);
+			
 		}
-		
-		System.out.println("\n\nTotal number of words initially clustered: " + N + "\n\n");
-		
+		printClusters();
+		System.out.println("\n\nTotal number of words initially clustered: " + N);
+		System.out.println("\n\nTotal set of words: " + globalWordSet.size() + "\n\n");
 		this.A = K;
 		this.B = N;
 		this.alpha =  A/(float)K;
 		this.beta = B/(float)N;
 	}
 	
-	private void removeWord (AdornedWord word) {
-		clusters.get(clusterMap.get(word)).remove(word);
-		clusterMap.remove(word);
+	private void removeWord (ProcessedWord pWord, ProcessedSentence pSentence) {
+		Integer clusterId = pWord.clusterID;
+		Integer clusterCount = pSentence.clusterCountMap.get(clusterId);
+		
+		clusters.get(clusterId).remove(pWord);
+		pWord.clusterID = null;
+			
+		if(clusterCount != null)
+			pSentence.clusterCountMap.put(clusterId, clusterCount - 1);
 	}
 	
-	private void putWord (AdornedWord word, Integer clusterId) {
-		clusterMap.put(word, clusterId); // associate word with the cluster
-		clusters.get(clusterId).add(word); //add word to the cluster
+	private void putWord (ProcessedWord pWord, Integer clusterId, ProcessedSentence pSentence) {
+		pWord.clusterID = clusterId; // associate word with the cluster
+		clusters.get(clusterId).add(pWord); //add word to the cluster
+		
+		
+		Integer clusterCount = pSentence.clusterCountMap.get(clusterId);
+		
+		if(clusterCount == null)
+			pSentence.clusterCountMap.put(clusterId, 1);
+		else pSentence.clusterCountMap.put(clusterId, clusterCount + 1);
+		
 	}
 	
 	
@@ -80,33 +105,48 @@ public class SimpleLDA {
 		System.out.println("Gibbs sampling: ");
 		for(int i = 0 ; i < iter; i++) {
 			if(i % 300 == 0) System.out.println("ITER: " + i);
-			for(List<AdornedWord> sentence : sentences) {
-				
-				for(AdornedWord word : sentence) {
-					removeWord(word);
-					gibbsEstimate(word, sentence);	
+			for(ProcessedSentence pSentence : pSentences) {
+				if(dbg)System.out.println("In sentence: " + pSentence.toString());
+				for(ProcessedWord word : pSentence.words) {
+					if(dbg)System.out.println("Clustering word " + word.toString());
+					removeWord(word, pSentence);
+					gibbsEstimate(word, pSentence);	
+					if(dbg)printClusters();
 					}
 				}
 			}
-		System.out.println("\n\nClusters outlook:\n\n");
-		for(Cluster cluster : clusters) {
-			System.out.println(cluster.words.toString());
-		}
+		 printClusters();	
 	}
 	
-	private void gibbsEstimate(AdornedWord word, List<AdornedWord> sentence) {
+	private void printClusters() {
+		int count = 0;
+		System.out.println("\n\nClusters outlook:\n\n");
+		for(Cluster cluster : clusters) {
+			count += cluster.words.size();
+			System.out.println(cluster.words.toString());
+		}
+		System.out.println("\nWords in all the clusters: " + count + "\n");
+	}
+	
+	private void gibbsEstimate(ProcessedWord word, ProcessedSentence pSentence) {
 		
 			List<Double> probs = new ArrayList<>(K); 
 			Double normConst = 0.;
+			if(dbg)System.out.println("Calculating probabilities: ");
 			for(int i = 0 ; i < clusters.size() ; i++ ) {
+				
 				Cluster cluster = clusters.get(i);
-				double term1 = ((double)(cluster.size() + alpha)) / (double)(N - 1 + A ); // A = K => alpha = 1
-				Integer thisWordInThisClusterCount = cluster.wordCounts.get(word.getLemmata()); 
+				
+				Integer thisSentenceClusterCount = pSentence.clusterCountMap.get(i);
+				if(thisSentenceClusterCount == null) thisSentenceClusterCount = 0;
+				double term1 = ((double)(thisSentenceClusterCount + alpha)) / (double)(pSentence.words.size() - 1 + A ); // A = K => alpha = 1
+				
+				Integer thisWordInThisClusterCount = cluster.wordCounts.get(word.lemma); 
 				if(thisWordInThisClusterCount == null) thisWordInThisClusterCount = 0;
 				double term2 = ((double)(thisWordInThisClusterCount + beta)) / (double)(N - 1 + B); // B = N => beta = 1
 				
 				Double prob = term1 * term2;
-				
+				if(dbg)System.out.print("cluster: " + i + " term1: " + term1 + " term2: " + term2 + " prob: " + prob + "\n");
 				probs.add(prob) ;
 				normConst += prob;
 					
@@ -114,15 +154,24 @@ public class SimpleLDA {
 			
 			probs = normalize(probs, normConst);
 			Integer newCluserId = sample(probs);
-			putWord (word, newCluserId);		
+			putWord (word, newCluserId, pSentence);
+			if(dbg)System.out.println();
 	}
 	
 	
 	private List<Double> normalize(List<Double> probs, Double normConst) {
-			for(Double prob : probs) {
+		double sumToOne = 0;
+		List<Double> normProbs = new ArrayList<>();
+		if(dbg)System.out.println("Normalized probabilites: ");
+			for(double prob : probs) {
 				prob = prob/normConst;
+				if(dbg)System.out.println(prob);
+				sumToOne+=prob;
+				normProbs.add(prob);
 			}
-			return probs;
+			if(dbg)System.out.println(normProbs.toString());
+			if(dbg)System.out.println("Sum of probs:" + sumToOne);
+			return normProbs;
 		}
 	
 	private Integer sample(List<Double> probs) {
@@ -132,15 +181,17 @@ public class SimpleLDA {
 		    
 			cumulativeProbability += probs.get(i);
 		    if (p <= cumulativeProbability) {
-		        return i;
+		    	if(dbg)System.out.println("Cluster chosen " + i + "\n");
+		    	return i;
 		    }
 		}
+		if(dbg)System.out.println("Cluster chosen (messed up) " + 1 + "\n");
 		return 1;
 	}
 	
 	public static void main(String[] args) {
 		String[] documentFiles = new String[] {"Church Murder.txt", "Starcraft Drama.txt", "Missing Plane.txt", "Five whole fingers.txt"};
-		SimpleLDA simpleLDA = new SimpleLDA(15, documentFiles);
+		SimpleLDA simpleLDA = new SimpleLDA(25, documentFiles);
 		simpleLDA.performLDA();
 	}	
 }
