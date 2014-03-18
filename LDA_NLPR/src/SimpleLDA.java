@@ -58,7 +58,6 @@ public class SimpleLDA {
 				
 				putWord (pWord, randomCluster, pSentence);
 				
-				
 				N++;
 				globalWordSet.add(lemmata); // set of all the words (as strings)
 				

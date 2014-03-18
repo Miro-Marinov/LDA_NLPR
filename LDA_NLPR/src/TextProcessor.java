@@ -48,8 +48,11 @@ public class TextProcessor {
 	TokenNameFinder perNameFinder;
 	TokenNameFinder locNameFinder;
 	TokenNameFinder orgNameFinder;
+	TokenNameFinder timNameFinder;
+	TokenNameFinder datNameFinder;
+	TokenNameFinder monNameFinder;
 	
-	
+	private static final boolean dbg = false;
 	PartOfSpeechTagger partOfSpeechTagger;
 	Lexicon wordLexicon;
 	PartOfSpeechTags partOfSpeechTags;
@@ -64,18 +67,26 @@ public class TextProcessor {
 		
 		try {
 			System.out.println("Loading trained Open NLP models..");
-			FileInputStream modelFileSent = new FileInputStream("models/en-sent.bin");
-			FileInputStream modelFileToken = new FileInputStream("models/en-token.bin");
+			FileInputStream modelFileSent     = new FileInputStream("models/en-sent.bin");
+			FileInputStream modelFileToken    = new FileInputStream("models/en-token.bin");
 			FileInputStream modelFilePerNames = new FileInputStream("models/en-ner-person.bin");
 			FileInputStream modelFileOrgNames = new FileInputStream("models/en-ner-organization.bin");
 			FileInputStream modelFileLocNames = new FileInputStream("models/en-ner-location.bin");
+			FileInputStream modelFileTimNames = new FileInputStream("models/en-ner-time.bin");
+			FileInputStream modelFileDatNames = new FileInputStream("models/en-ner-date.bin");
+			FileInputStream modelFileMonNames = new FileInputStream("models/en-ner-money.bin");
 
 			sdetector = new SentenceDetectorME(new SentenceModel(modelFileSent));
 			tokenizer = new TokenizerME(new TokenizerModel(modelFileToken));
 			
 			perNameFinder = new NameFinderME(new TokenNameFinderModel(modelFilePerNames));
 			locNameFinder = new NameFinderME(new TokenNameFinderModel(modelFileLocNames));
-			orgNameFinder = new NameFinderME(new TokenNameFinderModel(modelFileOrgNames));	
+			orgNameFinder = new NameFinderME(new TokenNameFinderModel(modelFileOrgNames));
+			
+			timNameFinder = new NameFinderME(new TokenNameFinderModel(modelFileTimNames));
+			datNameFinder = new NameFinderME(new TokenNameFinderModel(modelFileDatNames));
+			monNameFinder = new NameFinderME(new TokenNameFinderModel(modelFileMonNames));	
+			
 			standardizer = new DefaultSpellingStandardizer();
 			
 			partOfSpeechTagger = new DefaultPartOfSpeechTagger();
@@ -84,11 +95,17 @@ public class TextProcessor {
 			spellingTokenizer = new PennTreebankTokenizer();
 			partOfSpeechTags   =  wordLexicon.getPartOfSpeechTags();
 			
-			
-			
 			modelFileSent.close();
 			modelFileToken.close();
-						
+			
+			modelFilePerNames.close();
+			modelFileOrgNames.close();
+			modelFileLocNames.close();
+			
+			modelFileTimNames.close();
+			modelFileDatNames.close();
+			modelFileMonNames.close();
+			
 		} catch (InvalidFormatException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -100,22 +117,30 @@ public class TextProcessor {
 			e.printStackTrace();
 		}	
 	}
+	
 
-	private String[] sentenceDetect(String text)
-			throws InvalidFormatException, IOException {
-
-		String sentences[] = sdetector.sentDetect(text);
-		return sentences;
+	//load stop-words from a file
+	private HashSet<String> loadStopWords(String stopwordsFile) {
+		HashSet<String> stopWords = new HashSet<>();
+		 
+		try {
+			
+			BufferedReader br = new BufferedReader(new FileReader("stopwords/" + stopwordsFile));
+			String stopword;
+			while ((stopword = br.readLine()) != null) {
+			   stopWords.add(stopword);
+			}
+			br.close();
+			
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return stopWords;
 	}
 	
-	private String[] tokenSentence(String sentence)
-			throws InvalidFormatException, IOException {
-		
-		String[] tokens = tokenizer.tokenize(sentence);
-		return tokens;
-	}
-		
-	private List<String> removeStopWords(String[] tokens, HashSet<String> stopWords){
+	//remove stop-words from String tokens
+	private List<String> removeStopWords(String[] tokens, HashSet<String> stopWords) {
 		List<String> newTokens = new ArrayList<String>(Arrays.asList(tokens));
 		for (String token : tokens){
 			if (stopWords.contains(token)){
@@ -125,148 +150,119 @@ public class TextProcessor {
 		return newTokens;
 	}
 	
-	private List<List<AdornedWord>> tagSentences(List<List<String>> sentences){
-		return  partOfSpeechTagger.tagSentences( sentences );
+	 
+	private List<List<AdornedWord>> stemSentences(List<List<AdornedWord>> taggedSentences) {
+		
+				List<List<AdornedWord>> stemmedSentences = new ArrayList<>();
+				for(List<AdornedWord> taggedSentence : taggedSentences) {
+	 				
+				List<AdornedWord> stemmedSentence = new ArrayList<>();
+
+				 for ( AdornedWord adornedWord : taggedSentence ) {
+		             StandardSpellSetter.setStandardSpelling(adornedWord, standardizer, partOfSpeechTags);
+		             LemmaSetter.setLemma(adornedWord, wordLexicon, lemmatizer, partOfSpeechTags, spellingTokenizer);
+		             		             
+		             stemmedSentence.add(adornedWord); 
+		         }
+
+				 stemmedSentences.add(stemmedSentence); // context is now list of adornedWords
+			}
+
+	 			return stemmedSentences;	
+	 	} 
+		 
+		 
+	
+	
+	
+	// tag a name entity with a specified replacement
+	private String tagNames(String[] tokens, String sentence, TokenNameFinder nameFinder, String replacement) {
+		Span[] nameSpans = nameFinder.find(tokens);
+
+		if(nameSpans.length > 0) {
+			if(dbg)System.out.println("Repace name entities: " + Arrays.toString(Span.spansToStrings(nameSpans, tokens)) + " with: " + replacement);
+	    	String[] names = Span.spansToStrings(nameSpans, tokens);	
+	    	for(String name : names)
+	    		sentence = StringUtils.replaceFirst(sentence, name, replacement);
+	    }
+		return sentence;
+	}
+	// tag all name entities
+	private String tagNames(String[] tokens, String sentence) {		
+			sentence = tagNames(tokens, sentence, perNameFinder,  "Miroslav");
+			sentence = tagNames(tokens, sentence, locNameFinder,  "Bulgaria");
+			sentence = tagNames(tokens, sentence, orgNameFinder,  "FFA");
+			sentence = tagNames(tokens, sentence, timNameFinder,  "morning");
+			sentence = tagNames(tokens, sentence, datNameFinder,  "today");
+			sentence = tagNames(tokens, sentence, monNameFinder,  "pounds");
+			
+			return sentence;
+	}
+
+	 
+	 public List<ContextList> processContextLists(List<ContextList> allContextLists, String stopwordsFile) {
+		 List<ContextList>  newContextLists = new ArrayList<>();
+		 for(ContextList contextList : allContextLists) {
+			 newContextLists.add(processContextList(contextList, stopwordsFile));
+		 }
+		 return newContextLists;
 	 }
 	 
-	private void printAndSaveTaggedSentences(List<List<AdornedWord>> taggedSentences, String outputFile){
-		StringBuffer strBuff = new StringBuffer();
-		File file = new File("output/" + outputFile);
-
-		try {
-  
-	 			// if file doesn't exists, then create it
-	 			if (file.exists()) {
-	 				file.delete();
-	 			}
-	 			file.createNewFile();
-	 			FileWriter fw = new FileWriter(file.getAbsoluteFile(), true);
-	 			BufferedWriter bw = new BufferedWriter(fw);
-	 			
-			for(int i = 0 ; i < taggedSentences.size() ; i++) {
-				 List<AdornedWord> sentence = taggedSentences.get(i);
-				 strBuff.append(i + ": ");
-				 System.out.print(i + ": ");
-				 for ( AdornedWord adornedWord : sentence )
-		         {
-		             StandardSpellSetter.setStandardSpelling(adornedWord, standardizer, partOfSpeechTags);
-		             //  Set the lemma.
-		             LemmaSetter.setLemma(adornedWord, wordLexicon, lemmatizer, partOfSpeechTags, spellingTokenizer);
-		             //  Display the adornments.
-		             String adornment = adornedWord.getLemmata() + "(" + adornedWord.getPartsOfSpeech() + ")" + delimer;
-		             System.out.print(adornment);
-		             strBuff.append(adornment);
-		         }
-		 			bw.write(strBuff.toString());
-		 			
-		 			bw.newLine();
-		 			System.out.println();
-		 			
-		 			bw.flush();
-		 			strBuff.setLength(0);			
-			}
-			bw.close();  
-	 	} catch (IOException e) {
-	 		e.printStackTrace();
-	 		}    
-		 }
-
-	 public List<List<AdornedWord>> processDocuments(String[] documentFiles, String outputFile, String stopwordsFile) {
+	 
+	 // process a context list?
+	 public ContextList processContextList(ContextList contextList, String stopwordsFile) {
 		 System.out.println("Preprocessing documents (Punctuation, Names, Stopwords, Spellcheck, PoS, Lemmatizer)..");
-		 List<List<AdornedWord>> allTaggedProcessedSentences = new ArrayList<>();
+		 ContextList newContextList = new ContextList(contextList.targetWord);
 		 
-		 for(String documentFile : documentFiles) {	 
-			 
-			 List<List<String>> processedSentences = new ArrayList<>();
-			 ArrayList<String> sentences = new ArrayList<>();
-			 HashSet<String> stopWords = new HashSet<>();
-			 
-			try {
-				String documentText = new String(Files.readAllBytes(Paths.get("docs/" + documentFile)), StandardCharsets.UTF_8);
-				BufferedReader br = new BufferedReader(new FileReader("stopwords/" + stopwordsFile));
-				String stopword;
-				while ((stopword = br.readLine()) != null) {
-				   stopWords.add(stopword);
-				}
-				br.close();
-				sentences = new ArrayList<String>(Arrays.asList(sentenceDetect(documentText))); // divide the sentences using openNLP
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+		 for(Object context : contextList.contexts) {	 
+			String contextText = (String) context;
+
+				List<List<String>> processedSentences = new ArrayList<>();
+				ArrayList<String> sentences = new ArrayList<String>(Arrays.asList(sdetector.sentDetect(contextText))); // split context into sentences using Open NLP
 				
-			for (String sentence : sentences) {
-				System.out.println(sentence);
-				String[] tokens;
-					try {
-						tokens = tokenSentence(sentence);
-						Span[] nameSpans = perNameFinder.find(tokens);
-						Span[] locSpans = locNameFinder.find(tokens);
-						Span[] orgSpans = orgNameFinder.find(tokens);
-					
-						// if person names found - remove
-						if(nameSpans.length > 0) {
-					    	System.out.println("Found person entities: " + Arrays.toString(Span.spansToStrings(nameSpans, tokens)));
-					    	String[] names = Span.spansToStrings(nameSpans, tokens);	
-					    	for(String name : names)
-					    		sentence = StringUtils.replaceFirst(sentence, name, "");
-					    }
-						
-						// if location names found - remove
-						if(locSpans.length > 0) {
-					    	System.out.println("Found location entities: " + Arrays.toString(Span.spansToStrings(locSpans, tokens)));
-					    	String[] names = Span.spansToStrings(locSpans, tokens);			    	
-					    	for(String name : names)
-					    		sentence = StringUtils.replaceFirst(sentence, name, "");
-					    }
-						
-						// if person names found - remove
-						if(orgSpans.length > 0) {
-					    	System.out.println("Found organization entities: " + Arrays.toString(Span.spansToStrings(orgSpans, tokens)));
-					    	String[] names = Span.spansToStrings(orgSpans, tokens);			    	
-					    	for(String name : names)
-					    		sentence = StringUtils.replaceFirst(sentence, name, "");
-					    }
-					} catch (IOException e1) {
-						// TODO Auto-generated catch block
-						e1.printStackTrace();
-					}
-					
-				    sentence = sentence.toLowerCase();
-					sentence = sentence.replaceAll("[\\W\\d]", " "); // replace non-characters and digits with a space
-					sentence = sentence.replaceAll("\\b\\w{1,2}\\b\\s?", ""); //remove words less than 3 characters
-					
-					try {
-						tokens = tokenSentence(sentence);
-						List<String> newTokens = removeStopWords(tokens, stopWords); //remove stop-words			
-						if(newTokens.size() > 4) //save only sentences with length more than 4 words
-							processedSentences.add(newTokens); 		
-					} catch (IOException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
-			}
-			
-			List<List<AdornedWord>> taggedProcessedSentences = tagSentences(processedSentences);	
-			allTaggedProcessedSentences.addAll(taggedProcessedSentences);
-			
-			
+				for (String sentence : sentences) {
+					if(dbg)System.out.println(sentence);
+							String[] tokens = tokenizer.tokenize(sentence);
+							sentence = tagNames(tokens, sentence);
+						    //sentence = sentence.toLowerCase();
+							//sentence = sentence.replaceAll("[\\W]", " "); // replace non-characters and digits with a space
+							//sentence = sentence.replaceAll("\\b\\w{1,2}\\b\\s?", ""); //remove words less than 3 characters
+							
+							tokens = tokenizer.tokenize(sentence);		
+							/*
+							List<String> newTokens = removeStopWords(tokens, stopWords); //remove stop-words			
+							if(newTokens.size() > 4) //save only sentences with length more than 4 words
+							processedSentences.add(newTokens);*/
+							processedSentences.add(Arrays.asList(tokens));
+						} 
+				
+				List<List<AdornedWord>> taggedSentences = partOfSpeechTagger.tagSentences(processedSentences);	
+				List<List<AdornedWord>> stemmedSentences = stemSentences(taggedSentences);
+				newContextList.contexts.add(stemmedSentences); // context now is a list of list of AdornedWords
+			} 
+		 if(dbg) {
+			 for(Object context : newContextList.contexts) {
+				List<List<AdornedWord>> stemmedContext = (List<List<AdornedWord>>) context;
+				 	for(List<AdornedWord> stemmedSentence : stemmedContext) {
+				 		for(AdornedWord stemmedWord : stemmedSentence) {
+				 			System.out.print(stemmedWord.getLemmata() + "(" + stemmedWord.getPartsOfSpeech() + ")" + " ");	
+				 	}
+				 	System.out.print(delimer);
+				 	}
+				 	System.out.println();
+			 }
+			 System.out.println("\n");
 		 }
-		 System.out.println("\n----------------- Tagged Processed Sentences ----------------\n");
-		 printAndSaveTaggedSentences(allTaggedProcessedSentences, outputFile);
-		 System.out.println("\n\n");
+		 return newContextList;
+	 }
 		 
-		 System.out.println("\n\nAll tagged processed sentences written in output/" + outputFile);
-		 return allTaggedProcessedSentences;
-	}	
+
 
 	public static void main(String[] args) {
-
-		//String[] parts = args[0].split("<");
-		
+		XMLparser parser = new XMLparser();
+		parser.getFileNamesInFolder(new File("SemiEval2010 xml"));
+		List<ContextList> allContextLists = parser.parse(parser.files);
 		TextProcessor textProcessor = new TextProcessor();
-		String[] documentFiles = new String[] {"Church Murder.txt", "Starcraft Drama.txt", "Missing Plane.txt", "Five whole fingers.txt"};
-		String outputFile = "taggedProcessedSentences.txt";
-		textProcessor.processDocuments(documentFiles, outputFile, "stopwords.txt");
+		textProcessor.processContextLists(allContextLists, "stopwords.txt");
 	}	
 }
