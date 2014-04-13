@@ -174,6 +174,17 @@ public class TextProcessor {
 		 
 	
 	
+	// tag a name entity with a specified replacement
+	private List<String> getNames(String[] tokens, String sentence, TokenNameFinder nameFinder) {
+		Span[] nameSpans = nameFinder.find(tokens);
+		if(nameSpans.length > 0) {
+	    	String[] names = Span.spansToStrings(nameSpans, tokens);	
+	    	List<String> namesList = Arrays.asList(names);
+	    	return namesList;	
+	    }
+		return null;
+	}
+	
 	
 	// tag a name entity with a specified replacement
 	private String tagNames(String[] tokens, String sentence, TokenNameFinder nameFinder, String replacement) {
@@ -191,7 +202,7 @@ public class TextProcessor {
 	private String tagNames(String[] tokens, String sentence) {		
 			sentence = tagNames(tokens, sentence, perNameFinder,  "Miroslav");
 			sentence = tagNames(tokens, sentence, locNameFinder,  "Bulgaria");
-			sentence = tagNames(tokens, sentence, orgNameFinder,  "FFA");
+			sentence = tagNames(tokens, sentence, orgNameFinder,  "Bank of America");
 			sentence = tagNames(tokens, sentence, timNameFinder,  "morning");
 			sentence = tagNames(tokens, sentence, datNameFinder,  "today");
 			sentence = tagNames(tokens, sentence, monNameFinder,  "pounds");
@@ -213,47 +224,81 @@ public class TextProcessor {
 	 public ContextList processContextList(ContextList contextList, String stopwordsFile) {
 		 System.out.println("Preprocessing documents (Punctuation, Names, Stopwords, Spellcheck, PoS, Lemmatizer)..");
 		 ContextList newContextList = new ContextList(contextList.targetWord);
-		 
-		 for(Object context : contextList.contexts) {	 
-			String contextText = (String) context;
-
-				List<List<String>> processedSentences = new ArrayList<>();
-				ArrayList<String> sentences = new ArrayList<String>(Arrays.asList(sdetector.sentDetect(contextText))); // split context into sentences using Open NLP
+		 try {
+			 
+			 File outFileSentenceContext = new File("SemiEval2010 sentenceContexts/" + contextList.targetWord + ".txt");		
+				if (outFileSentenceContext.exists()) {
+					outFileSentenceContext.delete();
+	 			}
 				
-				for (String sentence : sentences) {
-					if(dbg)System.out.println(sentence);
+			 outFileSentenceContext.createNewFile();
+			 BufferedWriter bwSentenceContext = new BufferedWriter(new FileWriter(outFileSentenceContext));
+			 
+			 for(String context : contextList.contexts) {	 // for each context
+			 ArrayList<String> contextSentences = new ArrayList<String>(Arrays.asList(sdetector.sentDetect(context))); // split context into sentences using Open NLP
+				
+				
+				
+				
+				List<String> personNames = new ArrayList<>();
+				List<String> locationNames = new ArrayList<>();
+				List<String> organizationNames = new ArrayList<>();
+				List<String> timeNames = new ArrayList<>();
+				List<String> dateNames = new ArrayList<>();
+				List<String> moneyNames = new ArrayList<>();
+				
+				for (String sentence : contextSentences) { // for each sentence
+							//if(dbg)System.out.print(sentence + ".");
+							List<List<String>> newContextSentences = new ArrayList<>();
 							String[] tokens = tokenizer.tokenize(sentence);
-							sentence = tagNames(tokens, sentence);
-						    //sentence = sentence.toLowerCase();
+							
+							
+							personNames = getNames(tokens, sentence, perNameFinder);
+							locationNames = getNames(tokens, sentence, locNameFinder);
+							organizationNames = getNames(tokens, sentence, orgNameFinder);
+							timeNames = getNames(tokens, sentence, timNameFinder);
+							dateNames = getNames(tokens, sentence, datNameFinder);
+							moneyNames = getNames(tokens, sentence, monNameFinder);
+
+													
+							//sentence = sentence.toLowerCase();
 							//sentence = sentence.replaceAll("[\\W]", " "); // replace non-characters and digits with a space
 							//sentence = sentence.replaceAll("\\b\\w{1,2}\\b\\s?", ""); //remove words less than 3 characters
-							
-							tokens = tokenizer.tokenize(sentence);		
+								
 							/*
 							List<String> newTokens = removeStopWords(tokens, stopWords); //remove stop-words			
 							if(newTokens.size() > 4) //save only sentences with length more than 4 words
 							processedSentences.add(newTokens);*/
-							processedSentences.add(Arrays.asList(tokens));
-						} 
-				
-				List<List<AdornedWord>> taggedSentences = partOfSpeechTagger.tagSentences(processedSentences);	
-				List<List<AdornedWord>> stemmedSentences = stemSentences(taggedSentences);
-				newContextList.contexts.add(stemmedSentences); // context now is a list of list of AdornedWords
-			} 
-		 if(dbg) {
-			 for(Object context : newContextList.contexts) {
-				List<List<AdornedWord>> stemmedContext = (List<List<AdornedWord>>) context;
-				 	for(List<AdornedWord> stemmedSentence : stemmedContext) {
-				 		for(AdornedWord stemmedWord : stemmedSentence) {
-				 			System.out.print(stemmedWord.getLemmata() + "(" + stemmedWord.getPartsOfSpeech() + ")" + " ");	
-				 	}
-				 	System.out.print(delimer);
-				 	}
-				 	System.out.println();
-			 }
-			 System.out.println("\n");
+							
+							newContextSentences.add(Arrays.asList(tokens));
+							List<List<AdornedWord>> taggedSentences = partOfSpeechTagger.tagSentences(newContextSentences);	
+							List<List<AdornedWord>> stemmedSentences = stemSentences(taggedSentences);
+							StringBuffer newSentence = new StringBuffer();
+							for(List<AdornedWord> stemmedSentence : stemmedSentences) {	
+								for(AdornedWord word: stemmedSentence) {
+									System.out.print(word.getToken() + " ");
+									//if(dbg)System.out.print(word.getToken() + "|" + word.getLemmata() + "(" + word.getPartsOfSpeech()+ ")" + " ");	
+									//newSentence.append(word.getLemmata() + " ");	
+								}
+							} 
+							if(newSentence.toString().contains(contextList.targetWord)) {
+							bwSentenceContext.write(newSentence.toString());
+							bwSentenceContext.newLine();
+							bwSentenceContext.flush();
+							}
+							System.out.println();	
+							if(dbg)System.out.print("...");
+				}
+							
+			if(dbg)System.out.println();
+			
 		 }
-		 return newContextList;
+		     bwSentenceContext.close();
+		 	} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			 return newContextList;
 	 }
 		 
 
@@ -261,8 +306,9 @@ public class TextProcessor {
 	public static void main(String[] args) {
 		XMLparser parser = new XMLparser();
 		parser.getFileNamesInFolder(new File("SemiEval2010 xml"));
-		List<ContextList> allContextLists = parser.parse(parser.files);
+		
+		ContextList contextsAbsorb = parser.parse(new File("SemiEval2010 xml/absorb.v.train.xml"));
 		TextProcessor textProcessor = new TextProcessor();
-		textProcessor.processContextLists(allContextLists, "stopwords.txt");
+		textProcessor.processContextList(contextsAbsorb, "stopwords.txt");
 	}	
 }
