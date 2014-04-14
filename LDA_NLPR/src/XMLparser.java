@@ -55,7 +55,7 @@ public class XMLparser {
 				for (int child = 0; child < childList.getLength(); child ++) {
 					Node cNode = childList.item(child);
 					contextList.contexts.add(cNode.getTextContent());	
-					System.out.println(cNode.getTextContent());
+					
 					bw.write(cNode.getTextContent());
 					bw.newLine();
 					bw.flush();
