@@ -13,15 +13,15 @@ import java.util.List;
 public class XMLparser {
     List<File> files = new ArrayList<>();
 
-	public List<ContextList> parse(List<File> files) {		
-		List<ContextList> allContextLists = new ArrayList<ContextList>();
+	public void parse(List<File> files) {		
+
 		for (File file: files) {
-			allContextLists.add(parse(file));
+			parse(file);
 		}
-		return allContextLists;
+
 	}
 	
-	public ContextList parse(File file) {
+	public void parse(File file) {
 		DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
 		DocumentBuilder dBuilder;
 		// get the fileName without the extension
@@ -41,8 +41,6 @@ public class XMLparser {
 			outFile.createNewFile();
 			
 			BufferedWriter bw = new BufferedWriter(new FileWriter(outFile));
-			bw.write(targetWord);
-			bw.newLine();
 			System.out.println("\nCurrent URI :" + doc.getDocumentURI());
 			
 			NodeList rootList = doc.getChildNodes();
@@ -67,7 +65,6 @@ public class XMLparser {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		return contextList;
 	}
 	
 	public void getFileNamesInFolder(final File folder) {

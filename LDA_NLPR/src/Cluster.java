@@ -1,36 +1,43 @@
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-
-import edu.northwestern.at.morphadorner.corpuslinguistics.adornedword.AdornedWord;
+import java.util.PriorityQueue;
+import java.util.TreeSet;
 
 public class Cluster {
-	HashSet<ProcessedWord> words ;	
+	// words in the cluster
+	HashSet<Word> words ;
+	
+	// counts for each wordString in the cluster
 	HashMap<String, Integer> wordCounts ;
+	Integer id;
 	
 	public Cluster() {
+		this.id = IdHandler.getID();
 		words = new HashSet<>();
 		wordCounts = new HashMap<>();
 	}
-	
-	public void add(ProcessedWord word){
-		String lemma = word.lemma;
-		Integer wordCount = wordCounts.get(lemma);
-		
+
+	// add word to the cluster
+	public void add(Word word){
+		String wordString = word.wordString;
+		Integer wordCount = wordCounts.get(wordString);
+
 		if(wordCount == null)
-			wordCounts.put(lemma, 1);	
-		else wordCounts.put(lemma, wordCount + 1);	
-		
+			wordCounts.put(wordString, 1);	
+		else wordCounts.put(wordString, wordCount + 1);	
+
 		words.add(word);
 	}
-	
-	public void remove(ProcessedWord word){
-		String lemma = word.lemma;
+	// remove word from the cluster
+	public void remove(Word word){
+		String wordString = word.wordString;
 		words.remove(word);
-		Integer wordCount = wordCounts.get(lemma);
-		if(wordCount != null)
-			wordCounts.put(lemma, wordCount - 1);	
+		Integer wordCount = wordCounts.get(wordString);
+		if(wordCount != null && wordCount != 0)
+			wordCounts.put(wordString, wordCount - 1);	
 	}
-	
+
 	public Integer size() {
 		return words.size();
 	}
