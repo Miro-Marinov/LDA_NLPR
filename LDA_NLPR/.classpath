@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
 	<classpathentry kind="src" path="src"/>
-	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.7"/>
 	<classpathentry kind="lib" path="lib/morphadorner/dist/morphadorner.jar"/>
 	<classpathentry kind="lib" path="lib/morphadorner/gatelib/gate-4.jar"/>
 	<classpathentry kind="lib" path="lib/morphadorner/gatelib/jasper-jdt-6.0.13.jar"/>
@@ -41,7 +41,7 @@
 	<classpathentry kind="lib" path="lib/opennlp/opennlp-maxent-3.0.3.jar"/>
 	<classpathentry kind="lib" path="lib/opennlp/opennlp-tools-1.5.3.jar"/>
 	<classpathentry kind="lib" path="lib/opennlp/opennlp-uima-1.5.3.jar"/>
-	<classpathentry kind="lib" path="C:/Users/Miro/workspace/LDA_Infinite/Stanford NLP/stanford-corenlp-full-2014-06-16/stanford-corenlp-3.4.jar"/>
-	<classpathentry kind="lib" path="C:/Users/Miro/workspace/LDA_Infinite/Stanford NLP/stanford-corenlp-full-2014-06-16/stanford-corenlp-3.4-models.jar"/>
+	<classpathentry kind="lib" path="G:/NLPR Infinite/Stanford NLP/stanford-corenlp-full-2014-06-16/stanford-corenlp-3.4.jar"/>
+	<classpathentry kind="lib" path="G:/NLPR Infinite/Stanford NLP/stanford-corenlp-full-2014-06-16/stanford-corenlp-3.4-models.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

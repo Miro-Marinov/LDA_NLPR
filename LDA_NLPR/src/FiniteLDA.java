@@ -13,7 +13,7 @@ import opennlp.tools.tokenize.TokenizerModel;
 
 public class FiniteLDA {
     
-	private static boolean dbg = false;
+	private static boolean dbg = true;
 
 	private final Integer iter = 10000; // number of iterations for the Gibbs sampling
 
@@ -132,6 +132,7 @@ public class FiniteLDA {
 						// perform Gibbs for the word
 						gibbsEstimate(word, context);	
 						if(dbg)printClusters();
+						if(dbg)printContexts();
 						}
 					}
 				}
@@ -152,12 +153,12 @@ public class FiniteLDA {
 	
 	private void printContexts() {
 		int count = 0;
-		System.out.println("\n\nClusters outlook:\n\n");
-		for(Cluster cluster : clusters) {
-			count += cluster.words.size();
-			System.out.println(cluster.words.toString());
+		System.out.println("\n\nContext outlook:\n\n");
+		for(Context context : contexts) {
+			count += context.words.size();
+			System.out.println(context.words.toString());
 		}
-		System.out.println("\nWords in all the clusters: " + count + "\n");
+		System.out.println("\nWords in all the contexts: " + count + "\n");
 	}
 	
 	// Chooses a new cluster for the target word, based on all other instantiations
@@ -175,7 +176,7 @@ public class FiniteLDA {
 				// times this word has been clustered in this cluster (across all contexts)
 				Integer timesWordPresentInCluster = cluster.wordCounts.get(word.wordString); 
 				if(timesWordPresentInCluster == null) timesWordPresentInCluster = 0;
-				double term2 = ((double)(timesWordPresentInCluster + beta)) / (double)(cluster.size() - 1 + B); // B = N => beta = B/N = 1
+				double term2 = ((double)(timesWordPresentInCluster + beta)) / (double)(cluster.size() + B); // B = N => beta = B/N = 1
 
 				Double prob = term1 * term2;
 				if(dbg)System.out.print("cluster: " + i + " term1: " + term1 + " term2: " + term2 + " prob: " + prob + "\n");

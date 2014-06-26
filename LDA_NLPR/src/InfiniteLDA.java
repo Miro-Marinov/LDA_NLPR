@@ -139,6 +139,7 @@ public class InfiniteLDA {
 						// choose the cluster for the word via fully collapsed Gibbs
 						gibbsEstimate(word);	
 						if(dbg)printClusters();
+						if(dbg)printContexts();
 						}
 					}
 				}
@@ -159,13 +160,12 @@ public class InfiniteLDA {
 	
 	private void printContexts() {
 		int count = 0;
-		System.out.println("\n\nClusters outlook:\n\n");
-		for(Cluster cluster : clusters) {
-			count += cluster.words.size();
-			System.out.println(cluster.words.toString());
+		System.out.println("\n\nContext outlook:\n\n");
+		for(Context context : contexts) {
+			count += context.words.size();
+			System.out.println(context.words.toString());
 		}
-		System.out.println("\nWords in all the clusters: " + count + "\n");
-		System.out.println("\n\nNumber of clusters: " + clusters.size() + "\n\n");
+		System.out.println("\nWords in all the contexts: " + count + "\n");
 	}
 
 	private void gibbsEstimate(Word word) {
