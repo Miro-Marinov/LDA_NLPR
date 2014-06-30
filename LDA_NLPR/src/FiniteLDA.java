@@ -13,9 +13,9 @@ import opennlp.tools.tokenize.TokenizerModel;
 
 public class FiniteLDA {
     
-	private static boolean dbg = true;
+	private static boolean dbg = false;
 
-	private final Integer iter = 10000; // number of iterations for the Gibbs sampling
+	private final Integer iter = 4000; // number of iterations for the Gibbs sampling
 
 	private  Integer K; // number of clusters
     private  Integer A; // alpha = A/K
@@ -138,6 +138,7 @@ public class FiniteLDA {
 				}
 			}
 		 printClusters();	
+		 printContexts();
 	}
 
 	private void printClusters() {
@@ -218,12 +219,12 @@ public class FiniteLDA {
 		    	return i;
 		    }
 		}
-		if(dbg)System.out.println("Cluster chosen (messed up) " + 1 + "\n");
-		return 1;
+		if(dbg)System.out.println("Cluster chosen (messed up) " + (probs.size() - 1) + "\n");
+		return (probs.size() - 1);
 	}
 	// performs LDA on a collection of contexts
 	public static void main(String[] args) {
-		FiniteLDA simpleLDA = new FiniteLDA(25, new File("SemiEval2010 dependencyContexts/testLDA.txt"));
+		FiniteLDA simpleLDA = new FiniteLDA(25, new File("SemiEval2010 dependencyContexts/testLDABig.txt"));
 		simpleLDA.performLDA();
 		for(Context context : simpleLDA.contexts) {
 			context.printProbsBestCluster();

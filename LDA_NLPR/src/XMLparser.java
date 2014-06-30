@@ -80,7 +80,7 @@ public class XMLparser {
 
 	public static void main(String[] args){
 		XMLparser parser = new XMLparser();
-		parser.getFileNamesInFolder(new File("SemiEval2010 xml"));
-		parser.parse(parser.files);
+		//parser.getFileNamesInFolder(new File("SemiEval2010 xml"));
+		parser.parse(new File("SemiEval2010 xml/class.n.xml"));
 	}
 }

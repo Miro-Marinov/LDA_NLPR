@@ -183,7 +183,8 @@ public class InfiniteLDA {
 				// using conjugate term2 = p(xi | {xj | zj = k}, beta}
 
 				double term1 = ((double)(timesClusterUsedForContext)) / (double) (context.words.size() - 1 + alpha); 
-			    double term2 = ((double)(timesWordPresentInCluster + beta)) / (double)(cluster.size() - 1 + B); // B = N => beta = 1 
+			    /* not cluster.size() - 1 since the word data point is not yet included in the cluster */
+				double term2 = ((double)(timesWordPresentInCluster + beta)) / (double)(cluster.size() + B); // B = N => beta = 1 
 				if(dbg) {
 					System.out.println("\nterm1: " + term1 + "\n");
 					System.out.println("term2: " + term2 + "\n");

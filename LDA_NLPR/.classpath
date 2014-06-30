@@ -41,7 +41,7 @@
 	<classpathentry kind="lib" path="lib/opennlp/opennlp-maxent-3.0.3.jar"/>
 	<classpathentry kind="lib" path="lib/opennlp/opennlp-tools-1.5.3.jar"/>
 	<classpathentry kind="lib" path="lib/opennlp/opennlp-uima-1.5.3.jar"/>
-	<classpathentry kind="lib" path="G:/NLPR Infinite/Stanford NLP/stanford-corenlp-full-2014-06-16/stanford-corenlp-3.4.jar"/>
-	<classpathentry kind="lib" path="G:/NLPR Infinite/Stanford NLP/stanford-corenlp-full-2014-06-16/stanford-corenlp-3.4-models.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Andrew/Desktop/Internship NLPR/stanford-corenlp-full-2014-06-16/stanford-corenlp-3.4.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Andrew/Desktop/Internship NLPR/stanford-corenlp-full-2014-06-16/stanford-corenlp-3.4-models.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

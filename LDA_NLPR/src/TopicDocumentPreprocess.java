@@ -73,7 +73,7 @@ public class TopicDocumentPreprocess {
 	public TopicDocumentPreprocess() {
 		
 		try {
-			System.out.println("Loading trained Open NLP models..");
+			if(dbg)System.out.println("Loading trained Open NLP models..");
 			
 			FileInputStream modelFileSent     = new FileInputStream("models/en-sent.bin");
 			FileInputStream modelFileToken    = new FileInputStream("models/en-token.bin");
@@ -206,7 +206,7 @@ public class TopicDocumentPreprocess {
 		Span[] nameSpans = nameFinder.find(tokens);
 
 		if(nameSpans.length > 0) {
-			System.out.println("Repace name entities: " + Arrays.toString(Span.spansToStrings(nameSpans, tokens)) + " with: " + replacement);
+			if(dbg)System.out.println("Repace name entities: " + Arrays.toString(Span.spansToStrings(nameSpans, tokens)) + " with: " + replacement);
 	    	String[] names = Span.spansToStrings(nameSpans, tokens);	
 	    	for(String name : names)
 	    		sentence = StringUtils.replaceFirst(sentence, name, replacement);
@@ -257,6 +257,7 @@ public class TopicDocumentPreprocess {
 		    
 		    String line;
 			while((line = fileReader.readLine()) != null) {
+				System.out.println("New context");
 				if (tempFile.exists())
 					tempFile.delete();
 				tempFile.createNewFile();
@@ -269,7 +270,7 @@ public class TopicDocumentPreprocess {
 					Tree parse = lp.apply(sentence);
 				     
 				      //parse.pennPrint();
-				      System.out.println();
+				      if(dbg)System.out.println();
 				      
 				      ArrayList<String> words = new ArrayList<>();
 					  ArrayList<String> stems = new ArrayList<>();
@@ -353,16 +354,12 @@ public class TopicDocumentPreprocess {
 				    	  {
 				    		  dependencyContext = dependencyContext.replaceAll(" " + stems.get(i) + " ", "#possesPron");
 				    	  }
-				    	  else if (tags.get(i).equals("RB$"))
-				    	  {
-				    		  dependencyContext = dependencyContext.replaceAll(" " + stems.get(i) + " ", "#adverb");
-				    	  }
 				    	  else if (tags.get(i).equals("CC$"))
 				    	  {
 				    		  dependencyContext = dependencyContext.replaceAll(" " + stems.get(i) + " ", "#conjunction");
 				    	  }
 				      }
-				      System.out.println(dependencyContext);
+				      if(dbg)System.out.println(dependencyContext);
 				      dependencyContext = dependencyContext.replaceAll("Bulgaria", "#location");
 		    		  
 		    		  dependencyContext = dependencyContext.replaceAll("George", "#person");
@@ -374,12 +371,12 @@ public class TopicDocumentPreprocess {
 		    		  dependencyContext = dependencyContext.replaceAll("Friday", "#date");
 		    		  
 		    		  dependencyContext = dependencyContext.replaceAll("dollars", "#currency");
-		    		  System.out.println(dependencyContext);
+		    		  if(dbg)System.out.println(dependencyContext);
 		    		  dependencyContext = dependencyContext.replaceAll("[^\\w#]", " "); // replace non-(characters or digits) with a space (excluding the #)
 		    		  dependencyContext = dependencyContext.replaceAll("[\\d]", " "); //replace digits with a space
 		    		  dependencyContext = dependencyContext.replaceAll("\\s{2,}", " "); //replace digits with a space
 				      
-				      System.out.println(dependencyContext);
+				      if(dbg)System.out.println(dependencyContext);
 				      
 				      bwDependencyContext.write(dependencyContext);
 				      bwDependencyContext.write(" ");
@@ -403,7 +400,7 @@ public class TopicDocumentPreprocess {
 	 	 
 	 // process all paragraphs in a file to extract processed classical contexts (sentences contexts and window contexts comprising of just words)
 	 public void extractClassicalContexts(File file) {
-		 System.out.println("Preprocessing documents (Punctuation, Names, Stopwords, Spellcheck, PoS, Lemmatizer)..");
+		 if(dbg)System.out.println("Preprocessing documents (Punctuation, Names, Stopwords, Spellcheck, PoS, Lemmatizer)..");
 		 try {
 			 
 			 
@@ -490,7 +487,7 @@ public class TopicDocumentPreprocess {
 						bwSentenceContext.write(" ");
 										
 					contextParagraph.append(sentenceToWrite);		
-					//System.out.println();	
+					//if(dbg)System.out.println();	
 					if(dbg)System.out.print("...");
 				}
 				bwSentenceTagged.newLine();
@@ -498,7 +495,7 @@ public class TopicDocumentPreprocess {
 				
 				bwSentenceContext.newLine();
 				bwSentenceContext.flush();			
-			//System.out.println(contextParagraph.toString());		
+			//if(dbg)System.out.println(contextParagraph.toString());		
 		   
 			// Extract window around the word as context and save it in the appropriate /folder/file	
 			String[] tokensParagraph = tokenizer.tokenize(contextParagraph.toString());
@@ -550,8 +547,8 @@ public class TopicDocumentPreprocess {
 
 	public static void main(String[] args) {
 		TopicDocumentPreprocess textProcessor = new TopicDocumentPreprocess();
-		textProcessor.extractClassicalContexts(new File("SemiEval2010 txt/testLDA.txt"));
-		textProcessor.extractDependencyContexts(new File("SemiEval2010 rawSentencesTagged/testLDA.txt"));
+		textProcessor.extractClassicalContexts(new File("SemiEval2010 txt/testLDABig.txt"));
+		textProcessor.extractDependencyContexts(new File("SemiEval2010 rawSentencesTagged/testLDABig.txt"));
 
 		
 	}	
