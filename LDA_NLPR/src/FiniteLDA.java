@@ -120,7 +120,7 @@ public class FiniteLDA {
 	public void performLDA() {
 		System.out.println("Gibbs sampling: ");
 		for(int i = 0 ; i < iter; i++) {
-			if(i % 1000 == 0) System.out.println("ITER: " + i);
+			if(i % 100 == 0) System.out.println("ITER: " + i);
 			for(Context context : contexts) {
 				if(dbg)System.out.println("In context: " + context.toString());
 				for(Word word : context.words) {
@@ -224,7 +224,7 @@ public class FiniteLDA {
 	}
 	// performs LDA on a collection of contexts
 	public static void main(String[] args) {
-		FiniteLDA simpleLDA = new FiniteLDA(25, new File("SemiEval2010 dependencyContexts/testLDABig.txt"));
+		FiniteLDA simpleLDA = new FiniteLDA(25, new File("SemiEval2010 dependencyContexts/class.txt"));
 		simpleLDA.performLDA();
 		for(Context context : simpleLDA.contexts) {
 			context.printProbsBestCluster();

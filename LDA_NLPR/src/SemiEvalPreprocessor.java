@@ -269,10 +269,11 @@ public class SemiEvalPreprocessor {
 			
 			outFileDependencyContext.createNewFile();
 		    BufferedWriter bwDependencyContext = new BufferedWriter(new FileWriter(outFileDependencyContext));
-			
+		    Tree parse;
+		    GrammaticalStructure gs;
 			for (List<HasWord> sentence : new DocumentPreprocessor(file.getPath())){	
 		    
-		     Tree parse = lp.apply(sentence);
+		     parse = lp.apply(sentence);
 		     
 		      //parse.pennPrint();
 		      System.out.println();
@@ -293,18 +294,28 @@ public class SemiEvalPreprocessor {
 		   				stems.add(tw.word());
 		   			}
 		      /* extract dependency tree */
-		      GrammaticalStructure gs = gsf.newGrammaticalStructure(parse);
-		      //String dependencyContext = gs.typedDependenciesCollapsed().toString();
+		      gs = gsf.newGrammaticalStructure(parse);
+		      //String contextDependencies = gs.typedDependenciesCollapsed().toString();
  
 		      String dependencyContext = stems.toString();
-		      if(dbg)System.out.println(dependencyContext);
-		      if(dbg)System.out.println("stems: " + stems);
-		      if(dbg)System.out.println("tags: " + tags);
+		      System.out.println(sentence.toString());
+		      System.out.println(gs.typedDependenciesCollapsed().toString());
+		      System.out.println(gs.dependencies().toString());
+		      System.out.println(gs.getNodes().toString());
+		      System.out.println(gs.typedDependencies().toString());
+		      System.out.println(gs.typedDependenciesCCprocessed().toString());
+		      System.out.println(gs.typedDependenciesCollapsedTree().toString());
+
+		      
+		      System.out.println(dependencyContext);  
+		      System.out.println("tags: " + tags);
+
 		      dependencyContext = dependencyContext.replaceAll("[-][\\d]+", "");
 		      dependencyContext = StringUtils.replaceFirst(dependencyContext, "[", "");
 		      dependencyContext = StringUtils.replaceFirst(dependencyContext, "]", "");
+		      dependencyContext = dependencyContext.replaceAll("\\*", "");
 		      dependencyContext = dependencyContext.replaceAll(",", "  ");
-		      System.out.println(dependencyContext);
+		      
 
 		      for(int i = 0 ; i < stems.size() ; i++) {
 		    	  if(tags.get(i).equals("SYM")) {
