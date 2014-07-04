@@ -274,16 +274,31 @@ public class SemiEvalPreprocessor {
 		    GrammaticalStructure gs;
 		    
 		    Pattern p = Pattern.compile("[\\s\\(](" + targetWord + "-[\\d]+)");
+		    HashMap<String, ArrayList<String>> graphMap = new HashMap<>();
+		    HashMap<String, String> pathMap = new HashMap<>();
+		    HashMap<String, String> prevMap = new HashMap<>();
+		    
+		    ArrayList<String> words =  new ArrayList<>();
+			ArrayList<String> stems = new ArrayList<>();
+			ArrayList<String> tags  =  new ArrayList<>();
+			
+			Queue<String> q = new LinkedList<String>();
+			HashSet<String> used  = new HashSet<String>();
+		    
+		    
+		    StringBuilder bagOfWords = new StringBuilder();
+  	        StringBuilder bagOfDepend = new StringBuilder();
+		    
 			for (List<HasWord> sentence : new DocumentPreprocessor(file.getPath())){
 			 if(sentence.size() < 5)continue;
-		     HashMap<String, ArrayList<String>> graphMap = new HashMap<>();
-		     HashMap<String, String> pathMap = new HashMap<>();
-		     HashMap<String, String> prevMap = new HashMap<>();
+		     graphMap.clear();
+		     pathMap.clear();
+		     prevMap.clear();
 		     parse = lp.apply(sentence);
 		      
-		      ArrayList<String> words = new ArrayList<>();
-			  ArrayList<String> stems = new ArrayList<>();
-			  ArrayList<String> tags  = new ArrayList<>();
+		     words.clear();
+			 stems.clear();
+			 tags.clear();
 		      
 		      		// Get words and Tags
 		   			for (TaggedWord tw : parse.taggedYield()){
@@ -327,13 +342,13 @@ public class SemiEvalPreprocessor {
 		      }
 		      
 		    
-		     Queue<String> q = new LinkedList<String>();
-		     HashSet<String> used = new HashSet<String>();
-
-		     q.add(targetWordNode);
-		     pathMap.put(targetWordNode, "");
-		     used.add(targetWordNode);
-		     prevMap.put(targetWordNode, "");
+		    q.clear();
+		    used.clear();		    
+		     
+		    q.add(targetWordNode);
+		    pathMap.put(targetWordNode, "");
+		    used.add(targetWordNode);
+		    prevMap.put(targetWordNode, "");
 		    
     	    while (!q.isEmpty()) {
     	     String head = q.remove();
@@ -353,8 +368,8 @@ public class SemiEvalPreprocessor {
     	          used.add(i.split(" ")[0]);
     	        }
     	    }
-    	      StringBuilder bagOfWords = new StringBuilder();
-    	      StringBuilder bagOfDepend = new StringBuilder();
+    	       bagOfWords.setLength(0);
+    	       bagOfDepend.setLength(0);
 		      for(String i : pathMap.keySet()) {
 		    	  if(i.equals(targetWordNode) || i.contains("ROOT")) continue;
 		    	  bagOfWords.append(i.split("-\\d")[0] + " ");
@@ -526,21 +541,32 @@ public class SemiEvalPreprocessor {
 
 
 	public static void main(String[] args) {
-		SemiEvalPreprocessor textProcessor = new SemiEvalPreprocessor();
-		textProcessor.getFileNamesInFolder(new File("SemiEval2010 txt"));
-		
 		//textProcessor.extractClassicalContexts(new File("SemiEval2010 txt/class.n.txt"));
 		//extProcessor.extractDependencyContexts(new File("SemiEval2010 rawSentencesTagged/class.txt"));
+		SemiEvalPreprocessor textProcessor = new SemiEvalPreprocessor();
+		textProcessor.getFileNamesInFolder(new File("SemiEval2010 txt"));		
+		
+		//parser.getFileNamesInFolder(new File("SemiEval2010 xml"));
+		/*
+		XMLparser parser = new XMLparser();
+		parser.files = new ArrayList<>();
+		parser.getFileNamesInFolder(new File("SemiEval2010 xml"));
+		for(File file: parser.files)
+			parser.parse(file);	
+		
+		
 		
 		for(File file: textProcessor.files) {
 			System.out.println(file.getPath());
 			textProcessor.extractClassicalContexts(file);
-		}
+		}*/
 		
 		textProcessor.files = new ArrayList<>();
 		textProcessor.getFileNamesInFolder(new File("SemiEval2010 rawSentencesTagged"));
-		for(File file: textProcessor.files)
+		for(File file: textProcessor.files) {
+			System.out.println(file.getAbsolutePath() + "\n\n\n\n");
 			textProcessor.extractDependencyContexts(file);
+		}
 		
 	}	
 	
