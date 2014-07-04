@@ -14,6 +14,8 @@ public class Context {
 		words = new ArrayList<>();
 		clusterCountMap = new HashMap<>();
 	}
+	
+	
 	public void printProbsBestCluster() {
 		
 		Integer normalizingConstant = 0;

@@ -39,6 +39,8 @@ import edu.stanford.nlp.parser.lexparser.LexicalizedParser;
  
 
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 
 public class SemiEvalPreprocessor {
@@ -66,7 +68,6 @@ public class SemiEvalPreprocessor {
 	SpellingStandardizer standardizer;
 	WordTokenizer spellingTokenizer;
 	
-	//Stanford parser
 	LexicalizedParser lp;
 	WordStemmer ls; 
 	TreebankLanguagePack tlp;
@@ -269,13 +270,16 @@ public class SemiEvalPreprocessor {
 			
 			outFileDependencyContext.createNewFile();
 		    BufferedWriter bwDependencyContext = new BufferedWriter(new FileWriter(outFileDependencyContext));
-			
-			for (List<HasWord> sentence : new DocumentPreprocessor(file.getPath())){	
+		    Tree parse;
+		    GrammaticalStructure gs;
 		    
-		     Tree parse = lp.apply(sentence);
-		     
-		      //parse.pennPrint();
-		      System.out.println();
+		    Pattern p = Pattern.compile("[\\s\\(](" + targetWord + "-[\\d]+)");
+			for (List<HasWord> sentence : new DocumentPreprocessor(file.getPath())){
+			 if(sentence.size() < 5)continue;
+		     HashMap<String, ArrayList<String>> graphMap = new HashMap<>();
+		     HashMap<String, String> pathMap = new HashMap<>();
+		     HashMap<String, String> prevMap = new HashMap<>();
+		     parse = lp.apply(sentence);
 		      
 		      ArrayList<String> words = new ArrayList<>();
 			  ArrayList<String> stems = new ArrayList<>();
@@ -293,98 +297,101 @@ public class SemiEvalPreprocessor {
 		   				stems.add(tw.word());
 		   			}
 		      /* extract dependency tree */
-		      GrammaticalStructure gs = gsf.newGrammaticalStructure(parse);
-		      //String dependencyContext = gs.typedDependenciesCollapsed().toString();
- 
-		      String dependencyContext = stems.toString();
-		      if(dbg)System.out.println(dependencyContext);
-		      if(dbg)System.out.println("stems: " + stems);
-		      if(dbg)System.out.println("tags: " + tags);
-		      dependencyContext = dependencyContext.replaceAll("[-][\\d]+", "");
-		      dependencyContext = StringUtils.replaceFirst(dependencyContext, "[", "");
-		      dependencyContext = StringUtils.replaceFirst(dependencyContext, "]", "");
-		      dependencyContext = dependencyContext.replaceAll(",", "  ");
-		      System.out.println(dependencyContext);
+		      gs = gsf.newGrammaticalStructure(parse);
+
+		      Matcher matcher = p.matcher(gs.getNodes().toString());
+		      String targetWordNode = "";
+		      if(matcher.find())
+		    	  targetWordNode = matcher.group(1);
+		      else continue;
+
+		      for(TypedDependency dependency : gs.typedDependenciesCollapsed()) {
+		    	  
+		    	  String depString = dependency.toString();
+		    	  String[] splitBracket = depString.split("\\(");
+		    	  String edge = splitBracket[0];
+		    	  String[] splitComma = splitBracket[1].split(", ");
+		    	  String from = splitComma[0];
+		    	  String to = splitComma[1].split("\\)")[0];  
+		    	  		    	 
+		    	  if(graphMap.get(from) == null) {
+		    		  graphMap.put(from, new ArrayList<String>());
+		    	  }
+		    	  graphMap.get(from).add(to + " " + edge);
+		    	  
+
+		    	  if(graphMap.get(to) == null) {
+		    		  graphMap.put(to,  new ArrayList<String>());
+		    	  }
+		    	  graphMap.get(to).add(from + " " + edge + "*");
+		      }
+		      
+		    
+		     Queue<String> q = new LinkedList<String>();
+		     HashSet<String> used = new HashSet<String>();
+
+		     q.add(targetWordNode);
+		     pathMap.put(targetWordNode, "");
+		     used.add(targetWordNode);
+		     prevMap.put(targetWordNode, "");
+		    
+    	    while (!q.isEmpty()) {
+    	     String head = q.remove();
+    	     
+    	     String[] split = head.split(" ");
+    	     String prev = prevMap.get(split[0]);
+    	     if(prev != "") {
+    	    	 if(prev.equals(targetWordNode))pathMap.put(split[0], pathMap.get(prev)+split[1]);
+    	    	 else pathMap.put(split[0], pathMap.get(prev)+"-"+split[1]);
+    	     }
+
+    	     head = split[0];
+    	     for (String i : graphMap.get(head))
+    	        if (!used.contains(i.split(" ")[0])) {
+    	          q.add(i);
+    	          prevMap.put(i.split(" ")[0], head);
+    	          used.add(i.split(" ")[0]);
+    	        }
+    	    }
+    	      StringBuilder bagOfWords = new StringBuilder();
+    	      StringBuilder bagOfDepend = new StringBuilder();
+		      for(String i : pathMap.keySet()) {
+		    	  if(i.equals(targetWordNode) || i.contains("ROOT")) continue;
+		    	  bagOfWords.append(i.split("-\\d")[0] + " ");
+		    	  bagOfDepend.append(pathMap.get(i) + " ");
+		      }
+		      bagOfWords.append("| ");
+		      bagOfWords.append(bagOfDepend);
+		      String dependencyContext = bagOfWords.toString();
 
 		      for(int i = 0 ; i < stems.size() ; i++) {
 		    	  if(tags.get(i).equals("SYM")) {
-		    		  dependencyContext = dependencyContext.replaceAll(" " + stems.get(i) + " ", "#symbol");
+		    		  dependencyContext = dependencyContext.replaceAll(" " + stems.get(i) + " ", " #symbol ");
 		    	  }
 		    	  else if (tags.get(i).equals("UH")) {
-		    		  dependencyContext = dependencyContext.replaceAll(" " + stems.get(i) + " ", "#interjection");
+		    		  dependencyContext = dependencyContext.replaceAll(" " + stems.get(i) + " ", " #interjection ");
 		    	  }
 		    	  else if (tags.get(i).equals("PR")){
-		    		  dependencyContext = dependencyContext.replaceAll(" " + stems.get(i) + " ", "#particle");
+		    		  dependencyContext = dependencyContext.replaceAll(" " + stems.get(i) + " ", " #particle ");
 		    	  }
 		    	  else if (tags.get(i).equals("DT") || tags.get(i).equals("WDT"))
 		    	  {
-		    		  dependencyContext = dependencyContext.replaceAll(" " + stems.get(i) + " ", "#determiner");
-		    	  }
-		    	  else if (tags.get(i).equals("PDT")){
-		    		  dependencyContext = dependencyContext.replaceAll(" " + stems.get(i) + " ", "#predeterminer");
-		    	  }
-		    	  else if (tags.get(i).equals("IN"))
-		    	  {
-		    		  dependencyContext = dependencyContext.replaceAll(" " + stems.get(i) + " ", "#prep");
-		    	  }
-		    	  else if (tags.get(i).equals("PRP") || tags.get(i).equals("PRP$"))
-		    	  {
-		    		  dependencyContext = dependencyContext.replaceAll(" " + stems.get(i) + " ", "#pronoun");
-		    	  }
-		    	  else if (tags.get(i).equals("WP") || tags.get(i).equals("WP$"))
-		    	  {
-		    		  dependencyContext = dependencyContext.replaceAll(" " + stems.get(i) + " ", "#whpronoun");
-		    	  }
-		    	  else if (tags.get(i).equals("JJR") )
-		    	  {
-		    		  dependencyContext = dependencyContext.replaceAll(" " + stems.get(i) + " ", "#adjComp");
-		    	  }
-		    	  else if (tags.get(i).equals("JJS"))
-		    	  {
-		    		  dependencyContext = dependencyContext.replaceAll(" " + stems.get(i) + " ", "#adjSupr");
-		    	  }
-		    	  else if (tags.get(i).equals("EX"))
-		    	  {
-		    		  dependencyContext = dependencyContext.replaceAll(" " + stems.get(i) + " ", "#existent");
-		    	  }
-		    	  
-		    	  else if (tags.get(i).equals("POS"))
-		    	  {
-		    		  dependencyContext = dependencyContext.replaceAll(" " + stems.get(i) + " ", "#possesEnd");
-		    	  }
-		    	  
-		    	  else if (tags.get(i).equals("PPR"))
-		    	  {
-		    		  dependencyContext = dependencyContext.replaceAll(" " + stems.get(i) + " ", "#personPron");
-		    	  }
-		    	  else if (tags.get(i).equals("PRP$"))
-		    	  {
-		    		  dependencyContext = dependencyContext.replaceAll(" " + stems.get(i) + " ", "#possesPron");
+		    		  dependencyContext = dependencyContext.replaceAll(" " + stems.get(i) + " ", " #determiner ");
 		    	  }
 		    	  else if (tags.get(i).equals("CC$"))
 		    	  {
-		    		  dependencyContext = dependencyContext.replaceAll(" " + stems.get(i) + " ", "#conjunction");
+		    		  dependencyContext = dependencyContext.replaceAll(" " + stems.get(i) + " ", " #conjunction ");
 		    	  }
 		      }
-		      if(dbg)System.out.println(dependencyContext);
 		      dependencyContext = dependencyContext.replaceAll("Bulgaria", "#location");
-    		  
     		  dependencyContext = dependencyContext.replaceAll("George", "#person");
-    		  
     		  dependencyContext = dependencyContext.replaceAll("FFA", "#organization");
-    		  
-    		  dependencyContext = dependencyContext.replaceAll("morning", "#time");
-    		  
+       		  dependencyContext = dependencyContext.replaceAll("morning", "#time");
     		  dependencyContext = dependencyContext.replaceAll("Friday", "#date");
     		  
-    		  dependencyContext = dependencyContext.replaceAll("dollars", "#currency");
-    		  if(dbg)System.out.println(dependencyContext);
-    		  dependencyContext = dependencyContext.replaceAll("[^\\w#]", " "); // replace non-(characters or digits) with a space (excluding the #)
-    		  dependencyContext = dependencyContext.replaceAll("[\\d]", " "); //replace digits with a space
-    		  dependencyContext = dependencyContext.replaceAll("\\s{2,}", " "); //replace digits with a space
-		      
-		      if(dbg)System.out.println(dependencyContext);
-		      System.out.println(dependencyContext);
+    		  dependencyContext = dependencyContext.replaceAll("$", "#currency");
+    		  System.out.println(dependencyContext);
+
 		      bwDependencyContext.write(dependencyContext);
 		      bwDependencyContext.newLine();
 		            
@@ -405,13 +412,6 @@ public class SemiEvalPreprocessor {
 			 String targetWord = file.getName().substring(0, file.getName().indexOf("."));
 			 BufferedReader brParagraphs = new BufferedReader(new FileReader(file));
 			 	 
-			 File outFileSentenceContext = new File("SemiEval2010 sentenceContexts/" + targetWord + ".txt");		
-				if (outFileSentenceContext.exists()) {
-					outFileSentenceContext.delete();
-	 			}
-				
-			 outFileSentenceContext.createNewFile();
-			 BufferedWriter bwSentenceContext = new BufferedWriter(new FileWriter(outFileSentenceContext));
 			 
 			 File outFileSentenceTagged = new File("SemiEval2010 rawSentencesTagged/" + targetWord + ".txt");		
 				if (outFileSentenceTagged.exists()) {
@@ -421,14 +421,6 @@ public class SemiEvalPreprocessor {
 			 outFileSentenceTagged.createNewFile();
 			 BufferedWriter bwSentenceTagged = new BufferedWriter(new FileWriter(outFileSentenceTagged));
 			 
-	 
-			 File outFileWindowContext = new File("SemiEval2010 windowContexts/" + targetWord + ".txt");		
-				if (outFileWindowContext.exists()) {
-					outFileWindowContext.delete();
-	 			}
-				
-			 outFileWindowContext.createNewFile();
-			 BufferedWriter bwWindowContext = new BufferedWriter(new FileWriter(outFileWindowContext));
 
 			 
 			 String paragraph;
@@ -436,11 +428,8 @@ public class SemiEvalPreprocessor {
 			 ArrayList<String> contextSentences = new ArrayList<String>(Arrays.asList(sdetector.sentDetect(paragraph))); // split context into sentences using Open NLP
 			 	
 			 	
-			    StringBuffer contextParagraph = new StringBuffer();	
-				for (String sentence : contextSentences) { // for each sentence
-							
-					//if(dbg)System.out.print(sentence + ".");
-					List<List<String>> newContextSentences = new ArrayList<>();
+
+				for (String sentence : contextSentences) { // for each sentence	
 					String[] tokens = tokenizer.tokenize(sentence);
 					String replacedNamesSentence = replaceNames(tokens, sentence);
 					// save sentence with organizations replaced with famous entitities in rawSentences tagged
@@ -513,8 +502,7 @@ public class SemiEvalPreprocessor {
 			}*/  
 			
 		 }
-		     bwSentenceContext.close();
-		     bwWindowContext.close();
+
 		     brParagraphs.close();
 		     bwSentenceTagged.close();
 		     
@@ -542,19 +530,17 @@ public class SemiEvalPreprocessor {
 		textProcessor.getFileNamesInFolder(new File("SemiEval2010 txt"));
 		
 		//textProcessor.extractClassicalContexts(new File("SemiEval2010 txt/class.n.txt"));
-		textProcessor.extractDependencyContexts(new File("SemiEval2010 rawSentencesTagged/class.txt"));
+		//extProcessor.extractDependencyContexts(new File("SemiEval2010 rawSentencesTagged/class.txt"));
 		
-		/*
 		for(File file: textProcessor.files) {
 			System.out.println(file.getPath());
 			textProcessor.extractClassicalContexts(file);
 		}
 		
-		
 		textProcessor.files = new ArrayList<>();
 		textProcessor.getFileNamesInFolder(new File("SemiEval2010 rawSentencesTagged"));
 		for(File file: textProcessor.files)
-			textProcessor.extractDependencyContexts(file);	*/
+			textProcessor.extractDependencyContexts(file);
 		
 	}	
 	
