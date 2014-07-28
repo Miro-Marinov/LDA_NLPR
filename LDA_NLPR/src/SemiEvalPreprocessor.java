@@ -315,7 +315,7 @@ public class SemiEvalPreprocessor {
 		    
 			for (List<HasWord> sentence : new DocumentPreprocessor(file.getPath())){
 			System.out.println(sentenceCounter++);
-			if(sentenceCounter <= 422) continue;
+			
 				graphMap.clear();
 				pathMap.clear();
 				prevMap.clear();
