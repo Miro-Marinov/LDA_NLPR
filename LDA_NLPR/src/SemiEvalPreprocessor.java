@@ -47,6 +47,7 @@ public class SemiEvalPreprocessor {
 
 	private static final boolean dbg = false;
 	public static final int CONTEXT_WINDOW = 5;
+	public static final int DISTANCE = 5;
 	String delimer = " | ";
 	
 	// OPEN NLP 
@@ -273,32 +274,59 @@ public class SemiEvalPreprocessor {
 		    Tree parse;
 		    GrammaticalStructure gs;
 		    
-		    Pattern p = Pattern.compile("[\\s\\(](" + targetWord + "-[\\d]+)");
 		    HashMap<String, ArrayList<String>> graphMap = new HashMap<>();
 		    HashMap<String, String> pathMap = new HashMap<>();
 		    HashMap<String, String> prevMap = new HashMap<>();
+		    HashSet<String> nearNodes = new HashSet<>();
 		    
-		    ArrayList<String> words =  new ArrayList<>();
-			ArrayList<String> stems = new ArrayList<>();
-			ArrayList<String> tags  =  new ArrayList<>();
-			
-			Queue<String> q = new LinkedList<String>();
-			HashSet<String> used  = new HashSet<String>();
+		    LinkedList<String> q = new LinkedList<String>();
+		    HashSet<String> used = new HashSet<String>();
+		   
+		     ArrayList<String> words = new ArrayList<>();
+			 ArrayList<String> stems = new ArrayList<>();
+			 ArrayList<String> tags  = new ArrayList<>();
+			 
+			 
+			 String[] splitBracket ;
+	    	 String edge ;
+	    	 String[] splitComma ;
+	    	 String from ;
+	    	 String to ; 
+	    	 
+	    	 String head ;
+    	     String[] split ;
+    	     String prev ;
+    	     
+    	     Integer dist ;
+		     Boolean incr ;
+		     
+		     String node;
+		     
+		     StringBuilder allRepresentations = new StringBuilder();
+		     StringBuilder bagOfWords = new StringBuilder();
+		     StringBuilder bagOfDepend = new StringBuilder();
+		     
+		     String dependencyContext;
+		    
+		    Pattern p = Pattern.compile("[\\s\\(](" + targetWord + "-[\\d]+)");
+		    Integer sentenceCounter = 0;
 		    
 		    
-		    StringBuilder bagOfWords = new StringBuilder();
-  	        StringBuilder bagOfDepend = new StringBuilder();
 		    
 			for (List<HasWord> sentence : new DocumentPreprocessor(file.getPath())){
-			 if(sentence.size() < 5)continue;
-		     graphMap.clear();
-		     pathMap.clear();
-		     prevMap.clear();
-		     parse = lp.apply(sentence);
-		      
-		     words.clear();
-			 stems.clear();
-			 tags.clear();
+			System.out.println(sentenceCounter++);	
+				graphMap.clear();
+				pathMap.clear();
+				prevMap.clear();
+				nearNodes.clear();
+				
+				words.clear();
+				stems.clear();
+				tags.clear();
+				
+				parse = lp.apply(sentence);
+				if(sentence.size() < 5)continue;
+		     
 		      
 		      		// Get words and Tags
 		   			for (TaggedWord tw : parse.taggedYield()){
@@ -313,22 +341,26 @@ public class SemiEvalPreprocessor {
 		   			}
 		      /* extract dependency tree */
 		      gs = gsf.newGrammaticalStructure(parse);
-
+		     
 		      Matcher matcher = p.matcher(gs.getNodes().toString());
 		      String targetWordNode = "";
+		      
 		      if(matcher.find())
 		    	  targetWordNode = matcher.group(1);
 		      else continue;
 
-		      for(TypedDependency dependency : gs.typedDependenciesCollapsed()) {
-		    	  
+		      
+		      /* create the graph */
+		      for(TypedDependency dependency : gs.typedDependenciesCollapsed(true)) {
 		    	  String depString = dependency.toString();
-		    	  String[] splitBracket = depString.split("\\(");
-		    	  String edge = splitBracket[0];
-		    	  String[] splitComma = splitBracket[1].split(", ");
-		    	  String from = splitComma[0];
-		    	  String to = splitComma[1].split("\\)")[0];  
-		    	  		    	 
+		    	  
+		    	  
+		    	  splitBracket = depString.split("\\(");
+		    	  edge = splitBracket[0];
+		    	  splitComma = splitBracket[1].split(", ");
+		    	  from = splitComma[0];
+		    	  to = splitComma[1].split("\\)")[0]; 
+		    	  
 		    	  if(graphMap.get(from) == null) {
 		    		  graphMap.put(from, new ArrayList<String>());
 		    	  }
@@ -340,62 +372,84 @@ public class SemiEvalPreprocessor {
 		    	  }
 		    	  graphMap.get(to).add(from + " " + edge + "*");
 		      }
-		      
-		    
-		    q.clear();
-		    used.clear();		    
 		     
-		    q.add(targetWordNode);
-		    pathMap.put(targetWordNode, "");
-		    used.add(targetWordNode);
-		    prevMap.put(targetWordNode, "");
-		    
-    	    while (!q.isEmpty()) {
-    	     String head = q.remove();
+		     /* node -> (node edge) list */
+		     q.clear();
+		     used.clear();
+
+		     q.add(targetWordNode);
+		     pathMap.put(targetWordNode, "");
+		     used.add(targetWordNode);
+		     prevMap.put(targetWordNode, "");
+		     String nextStageMarker = "";
+		     dist = 1;
+		     incr = true;
+    	     /* extract the paths */
+		     while (!q.isEmpty()) {
+		    	 head = q.remove();
     	     
-    	     String[] split = head.split(" ");
-    	     String prev = prevMap.get(split[0]);
+    	     split = head.split(" ");
+    	     prev = prevMap.get(split[0]);
+    	     // update the path for the current node using the previous node info
     	     if(prev != "") {
     	    	 if(prev.equals(targetWordNode))pathMap.put(split[0], pathMap.get(prev)+split[1]);
     	    	 else pathMap.put(split[0], pathMap.get(prev)+"-"+split[1]);
     	     }
-
+    	     if(head.equals(nextStageMarker) && incr == false) incr = true;
     	     head = split[0];
-    	     for (String i : graphMap.get(head))
-    	        if (!used.contains(i.split(" ")[0])) {
-    	          q.add(i);
-    	          prevMap.put(i.split(" ")[0], head);
-    	          used.add(i.split(" ")[0]);
+    	     
+    	     for (String i : graphMap.get(head)) {
+    	        node = i.split(" ")[0];
+    	    	
+    	        if (!used.contains(node)) {
+    	          if(dist <= DISTANCE) nearNodes.add(node);
+    	          q.add(i); // adds the (node edge) string onto the queue
+    	          prevMap.put(node, head); //save the previous node
+    	          used.add(node);
     	        }
+    	     }
+    	    
+    	     if(incr == true && dist <= DISTANCE) {
+    	    	 incr = false;
+    	    	 dist++;
+    	    	 if(!q.isEmpty())nextStageMarker = q.getLast();
+    	     }
     	    }
-    	       bagOfWords.setLength(0);
-    	       bagOfDepend.setLength(0);
-		      for(String i : pathMap.keySet()) {
+    	      allRepresentations.setLength(0);
+		      bagOfWords.setLength(0);
+    	      bagOfDepend.setLength(0);
+		      
+    	      for(String i : pathMap.keySet()) {
 		    	  if(i.equals(targetWordNode) || i.contains("ROOT")) continue;
 		    	  bagOfWords.append(i.split("-\\d")[0] + " ");
 		    	  bagOfDepend.append(pathMap.get(i) + " ");
 		      }
-		      bagOfWords.append("| ");
-		      bagOfWords.append(bagOfDepend);
-		      String dependencyContext = bagOfWords.toString();
-
+    	      allRepresentations.append(bagOfWords);
+    	      allRepresentations.append("| ");
+    	      allRepresentations.append(bagOfDepend);
+    	      
+    	      bagOfDepend.setLength(0);
+    	      bagOfWords.setLength(0);
+    	      
+    	      for(String i : nearNodes) {
+    	    	  if(i.equals(targetWordNode) || i.contains("ROOT")) continue;
+		    	  bagOfWords.append(i.split("-\\d")[0] + " ");
+		    	  bagOfDepend.append(pathMap.get(i) + " ");
+    	      }
+    	      
+    	      allRepresentations.append("/ ");
+    	      allRepresentations.append(bagOfWords);
+    	      allRepresentations.append("| ");
+    	      allRepresentations.append(bagOfDepend);
+    	      
+		      dependencyContext = allRepresentations.toString();
+		      
 		      for(int i = 0 ; i < stems.size() ; i++) {
 		    	  if(tags.get(i).equals("SYM")) {
 		    		  dependencyContext = dependencyContext.replaceAll(" " + stems.get(i) + " ", " #symbol ");
 		    	  }
-		    	  else if (tags.get(i).equals("UH")) {
-		    		  dependencyContext = dependencyContext.replaceAll(" " + stems.get(i) + " ", " #interjection ");
-		    	  }
 		    	  else if (tags.get(i).equals("PR")){
 		    		  dependencyContext = dependencyContext.replaceAll(" " + stems.get(i) + " ", " #particle ");
-		    	  }
-		    	  else if (tags.get(i).equals("DT") || tags.get(i).equals("WDT"))
-		    	  {
-		    		  dependencyContext = dependencyContext.replaceAll(" " + stems.get(i) + " ", " #determiner ");
-		    	  }
-		    	  else if (tags.get(i).equals("CC$"))
-		    	  {
-		    		  dependencyContext = dependencyContext.replaceAll(" " + stems.get(i) + " ", " #conjunction ");
 		    	  }
 		      }
 		      dependencyContext = dependencyContext.replaceAll("Bulgaria", "#location");
@@ -404,12 +458,11 @@ public class SemiEvalPreprocessor {
        		  dependencyContext = dependencyContext.replaceAll("morning", "#time");
     		  dependencyContext = dependencyContext.replaceAll("Friday", "#date");
     		  
-    		  dependencyContext = dependencyContext.replaceAll("$", "#currency");
-    		  System.out.println(dependencyContext);
+    		  //dependencyContext = dependencyContext.replaceAll("$", "#currency"); //buggy
+    		  //System.out.println(dependencyContext);
 
-		      bwDependencyContext.write(dependencyContext);
-		      bwDependencyContext.newLine();
-		            
+		      bwDependencyContext.write(dependencyContext.toLowerCase().trim());
+		      bwDependencyContext.newLine();       
 		  }
 			bwDependencyContext.close();
 			} catch (Exception e) {
@@ -439,16 +492,18 @@ public class SemiEvalPreprocessor {
 
 			 
 			 String paragraph;
+			 Integer paragraphCount = 0;
 			 while((paragraph = brParagraphs.readLine()) != null) {	// for each context
+			 System.out.println(paragraphCount++);
 			 ArrayList<String> contextSentences = new ArrayList<String>(Arrays.asList(sdetector.sentDetect(paragraph))); // split context into sentences using Open NLP
-			 	
-			 	
 
 				for (String sentence : contextSentences) { // for each sentence	
+					
+					// save sentence with organizations replaced with famous entitities in rawSentences tagged
+					if(sentence.contains(targetWord)) {
 					String[] tokens = tokenizer.tokenize(sentence);
 					String replacedNamesSentence = replaceNames(tokens, sentence);
-					// save sentence with organizations replaced with famous entitities in rawSentences tagged
-					if(replacedNamesSentence.contains(targetWord)) {
+						
 					bwSentenceTagged.write(replacedNamesSentence);
 					bwSentenceTagged.newLine();
 					bwSentenceTagged.flush();
@@ -541,33 +596,35 @@ public class SemiEvalPreprocessor {
 
 
 	public static void main(String[] args) {
+		
+		
 		//textProcessor.extractClassicalContexts(new File("SemiEval2010 txt/class.n.txt"));
 		//extProcessor.extractDependencyContexts(new File("SemiEval2010 rawSentencesTagged/class.txt"));
 		SemiEvalPreprocessor textProcessor = new SemiEvalPreprocessor();
-		textProcessor.getFileNamesInFolder(new File("SemiEval2010 txt"));		
 		
 		//parser.getFileNamesInFolder(new File("SemiEval2010 xml"));
-		/*
-		XMLparser parser = new XMLparser();
+		
+		
+		 XMLparser parser = new XMLparser();
 		parser.files = new ArrayList<>();
 		parser.getFileNamesInFolder(new File("SemiEval2010 xml"));
 		for(File file: parser.files)
 			parser.parse(file);	
 		
-		
+		/*
+		textProcessor.getFileNamesInFolder(new File("SemiEval2010 txt"));
 		
 		for(File file: textProcessor.files) {
 			System.out.println(file.getPath());
 			textProcessor.extractClassicalContexts(file);
-		}*/
-		
-		textProcessor.files = new ArrayList<>();
-		textProcessor.getFileNamesInFolder(new File("SemiEval2010 rawSentencesTagged"));
-		for(File file: textProcessor.files) {
-			System.out.println(file.getAbsolutePath() + "\n\n\n\n");
-			textProcessor.extractDependencyContexts(file);
 		}
 		
+		
+		textProcessor.files = new ArrayList<>();
+		textProcessor.getFileNamesInFolder(new File("test"));
+		for(File file: textProcessor.files)
+			textProcessor.extractDependencyContexts(file);
+		*/
 	}	
 	
 	
