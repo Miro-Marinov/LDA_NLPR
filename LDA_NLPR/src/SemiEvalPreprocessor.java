@@ -611,7 +611,7 @@ public class SemiEvalPreprocessor {
 		for(File file: parser.files)
 			parser.parse(file);	
 		
-		/*
+		
 		textProcessor.getFileNamesInFolder(new File("SemiEval2010 txt"));
 		
 		for(File file: textProcessor.files) {
@@ -619,7 +619,7 @@ public class SemiEvalPreprocessor {
 			textProcessor.extractClassicalContexts(file);
 		}
 		
-		
+		/*
 		textProcessor.files = new ArrayList<>();
 		textProcessor.getFileNamesInFolder(new File("test"));
 		for(File file: textProcessor.files)
