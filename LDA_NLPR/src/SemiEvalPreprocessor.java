@@ -621,7 +621,7 @@ public class SemiEvalPreprocessor {
 		
 		/*
 		textProcessor.files = new ArrayList<>();
-		textProcessor.getFileNamesInFolder(new File("test"));
+		textProcessor.getFileNamesInFolder(new File("SemiEval2010 rawSentencesTagged"));
 		for(File file: textProcessor.files)
 			textProcessor.extractDependencyContexts(file);
 		*/
