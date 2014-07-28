@@ -609,7 +609,7 @@ public class SemiEvalPreprocessor {
 		//parser.getFileNamesInFolder(new File("SemiEval2010 xml"));
 		
 		
-		/* XMLparser parser = new XMLparser();
+		 XMLparser parser = new XMLparser();
 		parser.files = new ArrayList<>();
 		parser.getFileNamesInFolder(new File("SemiEval2010 xml"));
 		for(File file: parser.files)
@@ -623,11 +623,12 @@ public class SemiEvalPreprocessor {
 			textProcessor.extractClassicalContexts(file);
 		}
 		
-		*/
+		/*
 		textProcessor.files = new ArrayList<>();
 		textProcessor.getFileNamesInFolder(new File("SemiEval2010 rawSentencesTagged"));
 		for(File file: textProcessor.files)
 			textProcessor.extractDependencyContexts(file);
+		*/
 		
 	}	
 	
