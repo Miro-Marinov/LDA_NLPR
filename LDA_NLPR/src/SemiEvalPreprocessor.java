@@ -398,7 +398,7 @@ public class SemiEvalPreprocessor {
     	     }
     	     if(head.equals(nextStageMarker) && incr == false) incr = true;
     	     head = split[0];
-    	     
+    	     if(graphMap.get(head) == null) continue; // weird should never happen
     	     for (String i : graphMap.get(head)) {
     	        node = i.split(" ")[0];
     	    	
