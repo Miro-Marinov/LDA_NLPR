@@ -436,6 +436,7 @@ public class SemiEvalPreprocessor {
     	      
     	      for(String i : nearNodes) {
     	    	  if(i.equals(targetWordNode) || i.contains("ROOT")) continue;
+    	    	  i = i.trim().replaceFirst("^\\-", "");
 		    	  bagOfWords.append(i.split("-\\d")[0] + " ");
 		    	  bagOfDepend.append(pathMap.get(i) + " ");
     	      }
