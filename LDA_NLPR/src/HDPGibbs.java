@@ -88,7 +88,10 @@ public class HDPGibbs {
 					newdocument = new Document(documentID++);	
 				}
 				if(oneLine == null)System.out.println("null");
-				documentString = oneLine.split(" \\| ")[1];
+				String[] split = oneLine.split(" \\| ");
+				if(split.length < 2) continue;
+				
+				documentString = split[1];
 				Integer index = documentString.indexOf("/");
 				
 				if(index == -1) continue;
