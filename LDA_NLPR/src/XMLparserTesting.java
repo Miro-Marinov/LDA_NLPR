@@ -56,8 +56,9 @@ public class XMLparserTesting {
 					for (int cChild = 0; cChild < cchildList.getLength(); cChild ++) {
 						Node ccNode = cchildList.item(cChild);
 						if(ccNode.getBaseURI() != null) {
-						contextList.contexts.add(ccNode.getTextContent());	
-						bw.write(ccNode.getTextContent());
+						String toWrite = cNode.getNodeName() + " || " + ccNode.getTextContent();
+						contextList.contexts.add(toWrite);	
+						bw.write(toWrite);
 						bw.newLine();
 						bw.flush();
 						}

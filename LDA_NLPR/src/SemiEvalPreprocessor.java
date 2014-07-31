@@ -45,7 +45,6 @@ import java.util.regex.Pattern;
 
 public class SemiEvalPreprocessor {
 
-	private static final boolean dbg = false;
 	public static final int CONTEXT_WINDOW = 5;
 	public static final int DISTANCE = 5;
 	String delimer = " | ";
@@ -206,10 +205,6 @@ public class SemiEvalPreprocessor {
 	 			return stemmedSentences;	
 	 	} 
 		 
-		 
-	
-	
-	
 	private List<String> getNames(String[] tokens, String sentence, TokenNameFinder nameFinder) {
 		Span[] nameSpans = nameFinder.find(tokens);
 		if(nameSpans.length > 0) {
@@ -311,12 +306,17 @@ public class SemiEvalPreprocessor {
 		    Pattern p = Pattern.compile("[\\s\\(](" + targetWord + "-[\\d]+)");
 		    Integer sentenceCounter = 0;
 		    
-		    
-		    
-			for (List<HasWord> sentence : new DocumentPreprocessor(file.getPath())){
+		    DocumentPreprocessor docProcessor = new DocumentPreprocessor(file.getPath());
+		    docProcessor.setElementDelimiter("\n");
+		    System.out.println("\n" + targetWord + "\n");
+			for (List<HasWord> sentence : docProcessor){
+			String version = sentence.get(0).toString() + sentence.get(1).toString();
+			sentence.remove(0);
+			sentence.remove(0);
+			sentence.remove(0);
+			sentence.remove(0);
 			System.out.println(sentenceCounter++);
-			
-				graphMap.clear();
+			graphMap.clear();
 				pathMap.clear();
 				prevMap.clear();
 				nearNodes.clear();
@@ -326,7 +326,6 @@ public class SemiEvalPreprocessor {
 				tags.clear();
 				
 				parse = lp.apply(sentence);
-				if(sentence.size() < 5)continue;
 		     
 		      
 		      		// Get words and Tags
@@ -340,6 +339,7 @@ public class SemiEvalPreprocessor {
 		   			for (TaggedWord tw : parse.taggedYield()){
 		   				stems.add(tw.word());
 		   			}
+		   	  
 		      /* extract dependency tree */
 		      gs = gsf.newGrammaticalStructure(parse);
 		     
@@ -398,7 +398,11 @@ public class SemiEvalPreprocessor {
     	     }
     	     if(head.equals(nextStageMarker) && incr == false) incr = true;
     	     head = split[0];
-    	     if(graphMap.get(head) == null) continue; // weird should never happen
+    	     if(graphMap.get(head) == null) {
+    	    	 System.out.println("WEIRD BUG");
+    	    	 continue; // weird should never happen
+    	    	
+    	     }
     	     for (String i : graphMap.get(head)) {
     	        node = i.split(" ")[0];
     	    	
@@ -467,7 +471,7 @@ public class SemiEvalPreprocessor {
     		  //dependencyContext = dependencyContext.replaceAll("$", "#currency"); //buggy
     		  //System.out.println(dependencyContext);
 
-		      bwDependencyContext.write(dependencyContext.toLowerCase().trim());
+		      bwDependencyContext.write(version + " || " + dependencyContext.toLowerCase().trim());
 		      bwDependencyContext.newLine();       
 		  }
 			bwDependencyContext.close();
@@ -499,8 +503,13 @@ public class SemiEvalPreprocessor {
 			 
 			 String paragraph;
 			 Integer paragraphCount = 0;
+			 String version;
 			 while((paragraph = brParagraphs.readLine()) != null) {	// for each context
-			 System.out.println(paragraphCount++);
+			 
+		     String[] split = paragraph.split(" \\|\\| ");
+		     version = split[0];
+		     paragraph = split[1];
+		     System.out.println(paragraphCount++);
 			 ArrayList<String> contextSentences = new ArrayList<String>(Arrays.asList(sdetector.sentDetect(paragraph))); // split context into sentences using Open NLP
 
 				for (String sentence : contextSentences) { // for each sentence	
@@ -510,8 +519,8 @@ public class SemiEvalPreprocessor {
 					String[] tokens = tokenizer.tokenize(sentence);
 					String replacedNamesSentence = replaceNames(tokens, sentence);
 						
-					bwSentenceTagged.write(replacedNamesSentence);
-					bwSentenceTagged.newLine();
+					bwSentenceTagged.write(version + " || " + replacedNamesSentence + "."); // add a dot in the end so that the stupid
+					bwSentenceTagged.newLine();							 // Stanford parser sees it as a sentence
 					bwSentenceTagged.flush();
 					}
 					
@@ -610,27 +619,26 @@ public class SemiEvalPreprocessor {
 		
 		//parser.getFileNamesInFolder(new File("SemiEval2010 xml"));
 		
-		
+		 /*
 		XMLparserTesting parser = new XMLparserTesting();
 		parser.files = new ArrayList<>();
 		parser.getFileNamesInFolder(new File("SemiEval2010 xml"));
 		for(File file: parser.files)
 			parser.parse(file);	
+     
 		
-		/*
 		textProcessor.getFileNamesInFolder(new File("SemiEval2010 txt"));
-		
 		for(File file: textProcessor.files) {
 			System.out.println(file.getPath());
 			textProcessor.extractClassicalContexts(file);
 		}
-		
+		*/
 		
 		textProcessor.files = new ArrayList<>();
 		textProcessor.getFileNamesInFolder(new File("SemiEval2010 rawSentencesTagged"));
 		for(File file: textProcessor.files)
 			textProcessor.extractDependencyContexts(file);
-		*/
+		
 		
 	}		
 }
