@@ -1,8 +1,13 @@
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -14,6 +19,25 @@ import opennlp.tools.tokenize.TokenizerModel;
 
 public class FiniteLDAGibbs {
 	IdHandler idHandler = new IdHandler();
+
+	private static boolean dbg = false;
+
+	private  Integer K; // number of topics
+    private  Integer A; // alpha = A/K
+    private  Integer N; // total number of unique words across all documents
+    private  Integer B; // beta = B/N
+    
+    List<Topic> topics; // list of topics
+	List<Document> documents; // list of documents
+
+	private HashSet<String> globalWordSet; // set of distinct words across the whole document collection
+
+	private final double alpha = 1.; // alpha = K/A
+	private final double beta = 1.;  // beta
+	String targetWord;
+	Random randGen;
+	FileInputStream modelFileToken;
+	Tokenizer tokenizer;
 	
 	public class Topic {
 		// words in the cluster
@@ -48,7 +72,12 @@ public class FiniteLDAGibbs {
 			if(wordCount != null && wordCount != 0)
 				wordCounts.put(wordString, wordCount - 1);	
 		}
-
+		
+		@Override
+		public String toString() {
+			return "" + id;
+		}
+		
 		public Integer size() {
 			return words.size();
 		}
@@ -59,12 +88,26 @@ public class FiniteLDAGibbs {
 		HashMap<Topic, Integer> topicCountMap; // Topic -> count for that context
 		Integer id;
 		private static final boolean dbg = false;
+		final String version;
 		
-		public Document(String contextString, Integer id) {
+		public Document(int id, String version) {
 			this.id = id;
-			words = new ArrayList<>();
-			topicCountMap = new HashMap<>();
+			this.version = version;
+		    words = new ArrayList<>();	
+		    topicCountMap = new HashMap<>();
 		}
+		
+		public Document(int id) {
+			this.id = id;
+			version = "null";
+		    words = new ArrayList<>();	
+		    topicCountMap = new HashMap<>();
+		}
+		
+		@Override
+	    public String toString() {
+	    	return "doc(" + id + ")";
+	    }
 		
 		
 		public void printProbsBesttopic() {
@@ -89,11 +132,6 @@ public class FiniteLDAGibbs {
 			System.out.print("For context" + id + " best topic is: " + besttopic.id + " with prob: " + bestProb);
 			System.out.println();
 		}
-		
-		@Override
-		public String toString() {
-			return words.toString();
-		}
 	}
 	
 	 class Word { //word object 
@@ -114,27 +152,7 @@ public class FiniteLDAGibbs {
 	}
 	
 
-	
-    
-	private static boolean dbg = false;
-
-	private final Integer iter = 4000; // number of iterations for the Gibbs sampling
-
-	private  Integer K; // number of topics
-    private  Integer A; // alpha = A/K
-    private  Integer N; // total number of unique words across all documents
-    private  Integer B; // beta = B/N
-    
-    List<Topic> topics; // list of topics
-	List<Document> documents; // list of documents
-
-	private HashSet<String> globalWordSet; // set of distinct words across the whole document collection
-
-	private final double alpha = 1.; // alpha = K/A
-	private final double beta = 1.;  // beta
-	String targetWord;
-
-	public FiniteLDAGibbs(Integer K, File file) {
+	public FiniteLDAGibbs(Integer K) {
 		
 		System.out.println("\n\nPerforming LDA on the specified documents..");
 		this.K = K;
@@ -146,57 +164,86 @@ public class FiniteLDAGibbs {
 			topics.add(new Topic());
 		}
 
+		
 		globalWordSet = new HashSet<>();
 		documents = new ArrayList<>();
-
-		
-		Random randGen = new Random();
-		Integer documentID = 0;
-		
-			
-		
-		System.out.println("\n\nInitial random topic assignment..");
-		try {	
-			String targetWord = file.getName().substring(0, file.getName().indexOf("."));
-			BufferedReader brdocuments = new BufferedReader(new FileReader(file));
-			if(dbg)System.out.println("\n\nRarget word is " + targetWord);
-			String documentString;
-			FileInputStream modelFileToken    = new FileInputStream("models/en-token.bin");
-			Tokenizer tokenizer = new TokenizerME(new TokenizerModel(modelFileToken));
-			// parse all the documents
-			while((documentString = brdocuments.readLine()) != null) {	// for each document
-				String[] wordStrings = tokenizer.tokenize(documentString);
-				Document newdocument = new Document(documentString, documentID++);
-				// parse all the strings for a document
-				for(String wordString : wordStrings) {
-					if(!wordString.equals(targetWord)) {
-						Integer randomtopicId = randGen.nextInt(K); // gives me a random topic of a word
-						Topic randomtopic = topics.get(randomtopicId);
-						
-						Word word = new Word(wordString, newdocument, randomtopic);
-						newdocument.words.add(word);
-						//random topic assignment
-						putWord (word, randomtopic, newdocument);
-		
-						N++;
-						globalWordSet.add(wordString); // set of all unique words present across all documents
-					}
-				}
-				documents.add(newdocument);
-			}
-			brdocuments.close();
+		randGen = new Random();
+		try {
+			modelFileToken    = new FileInputStream("models/en-token.bin");
+			tokenizer = new TokenizerME(new TokenizerModel(modelFileToken));
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-			}
+		}
 		
-		printtopics();
-		System.out.println("\n\nTotal number of words initially topiced: " + N);
-		System.out.println("\n\nTotal unique words: " + globalWordSet.size() + "\n\n");
-		System.out.println("\n\nNumber of topics: " + topics.size() + "\n\n");
-		this.A = K;
-		this.B = globalWordSet.size(); //number of unique words
-	}
+	    }
+	
+	
+		private void readData(File file, boolean test) {
+			
+			Integer documentID = 0;
+			documents.clear();
+			String version = "null";
+			System.out.println("\n\nInitial random topic assignment..");
+			try {	
+				targetWord = file.getName().substring(0, file.getName().indexOf("."));
+				BufferedReader brdocuments = new BufferedReader(new FileReader(file));
+				System.out.println("\n\nTarget word is " + targetWord);
+				String oneLine;
+
+				// parse all the documents
+				while((oneLine = brdocuments.readLine()) != null) {	// for each document
+					String documentString;
+					Document newdocument;
+					
+					if(test) {
+					String[] split = oneLine.split(" \\|\\| ");
+					oneLine = split[1];
+					version = split[0];
+					newdocument = new Document(documentID++, version);
+					}
+					else {
+						newdocument = new Document(documentID++);	
+					}
+					
+					documentString = oneLine.split(" / ")[0];
+					documentString = documentString.split(" \\| ")[0];
+					//System.out.println(documentString);
+					//System.out.println(version);
+					
+					
+					String[] wordStrings = tokenizer.tokenize(documentString);
+					newdocument = new Document(documentID++, version);
+					// parse all the strings for a document
+					for(String wordString : wordStrings) {
+						if(!wordString.equals(targetWord)) {
+							Integer randomtopicId = randGen.nextInt(K); // gives me a random topic of a word
+							Topic randomtopic = topics.get(randomtopicId);
+							
+							Word word = new Word(wordString, newdocument, randomtopic);
+							newdocument.words.add(word);
+							//random topic assignment
+							putWord (word, randomtopic, newdocument);
+			
+							N++;
+							globalWordSet.add(wordString); // set of all unique words present across all documents
+						}
+					}
+					documents.add(newdocument);
+				}
+				brdocuments.close();
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+				}
+			//printtopics();
+			System.out.println("\n\nTotal number of words initially topiced: " + N);
+			System.out.println("\n\nSize of vocabulary: " + globalWordSet.size() + "\n\n");
+			System.out.println("\n\nNumber of topics: " + topics.size() + "\n\n");
+			this.A = K;
+			this.B = globalWordSet.size(); //vocabulary size
+		}
+
 	// remove word from a topic
 	private void removeWord (Word word, Document document) {
 		Topic topic = word.topic;
@@ -205,8 +252,11 @@ public class FiniteLDAGibbs {
 		topic.remove(word);
 		word.topic = null;
 
-		if(topicCount != null && topicCount != 0)
+		if(topicCount != null && topicCount != 0) {
 			document.topicCountMap.put(topic, topicCount - 1);
+			if(topicCount == 1) document.topicCountMap.remove(topic);
+		}
+			
 	}
 	// put a word in a topic
 	private void putWord (Word word, Topic topic, Document document) {
@@ -221,10 +271,11 @@ public class FiniteLDAGibbs {
 	}
 
 	// perform LDA for the document collection for an ambiguous word
-	public void performLDA() {
+	public void performLDA(Integer iter, Integer shuffleLag) {
 		System.out.println("Gibbs sampling: ");
 		for(int i = 0 ; i < iter; i++) {
-			if(i % 100 == 0) System.out.println("ITER: " + i);
+			if ((shuffleLag > 0) && (i > 0) && (i % shuffleLag == 0))
+				doShuffle();
 			for(Document document : documents) {
 				if(dbg)System.out.println("In document: " + document.toString());
 				for(Word word : document.words) {
@@ -240,11 +291,23 @@ public class FiniteLDAGibbs {
 						}
 					}
 				}
+			System.out.println("iter = " + i + " #topics = " + topics.size());
 			}
-		 printtopics();	
-		 printdocuments();
+		 //printtopics();	
+		 //printdocuments();
 	}
 
+	/**
+	 * Permute the ordering of documents and words in the bookkeeping (initiated from time to time)
+	 */
+	protected void doShuffle() {
+		Collections.shuffle(documents);
+		for (Document d : documents){
+			Collections.shuffle(d.words);
+		}
+	}
+	
+	
 	private void printtopics() {
 		int count = 0;
 		System.out.println("\n\ntopics outlook:\n\n");
@@ -323,15 +386,79 @@ public class FiniteLDAGibbs {
 		    	return i;
 		    }
 		}
-		if(dbg)System.out.println("Topic chosen (messed up) " + (probs.size() - 1) + "\n");
+		System.out.println("Topic chosen (messed up) " + (probs.size() - 1) + "\n");
 		return (probs.size() - 1);
 	}
+	
+	
+	private void saveResult() {
+		 File outFileResult = new File("output/" + targetWord + ".txt");		
+			if (outFileResult.exists()) {
+				outFileResult.delete();
+			}
+			
+		 try {
+			 outFileResult.createNewFile();
+			 BufferedWriter bwResult = new BufferedWriter(new FileWriter(outFileResult));
+		
+		//absorb.v absorb.v.2 absorb.cluster.1/0.8 absorb.cluster.2/0.2
+	    StringBuilder toWrite = new StringBuilder();
+		for(Document doc : documents) {
+			Integer normalizingConstant = 0;
+			toWrite.setLength(0);
+			toWrite.append(doc.version.split(".\\d")[0] + " ");
+			toWrite.append(doc.version);
+			for(Integer value: doc.topicCountMap.values()) {
+				normalizingConstant += value;
+			}
+
+			
+			//System.out.println("Document is: " + doc.id );
+			for(Topic topic: doc.topicCountMap.keySet()) {
+				Double topicProb = (double)doc.topicCountMap.get(topic)/(double)normalizingConstant;
+				//System.out.println("Topic: " + topic + " times used is:" + doc.topicCountMap.get(topic));
+				//System.out.println("Topic: " + topic + " prob is:" + topicProb);
+				toWrite.append(" " + targetWord + ".cluster" + "." + topic.id + "/" + topicProb);
+			}
+			bwResult.write(toWrite.toString());
+			bwResult.newLine();
+			bwResult.flush();
+			//System.out.print("For document" + doc.id + " best topic is: " + besttopic.id + " with prob: " + bestProb);
+			//System.out.println();
+		}
+		
+		bwResult.close();
+	 } catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
 	// performs LDA on a collection of documents
 	public static void main(String[] args) {
-		FiniteLDAGibbs simpleLDA = new FiniteLDAGibbs(25, new File("SemiEval2010 dependencydocuments/class.txt"));
-		simpleLDA.performLDA();
-		for(Document document : simpleLDA.documents) {
-			document.printProbsBesttopic();
+		XMLparserTesting parser = new XMLparserTesting();
+		parser.files.clear();
+		parser.getFileNamesInFolder(new File("Train"));
+		
+		for(File file : parser.files) {
+			String targetWord = file.getName().substring(file.getName().lastIndexOf("/") + 1, file.getName().lastIndexOf("."));
+			System.out.println(targetWord);
+			
+			FiniteLDAGibbs simpleLDA = new FiniteLDAGibbs(25);
+			simpleLDA.readData(file, false);
+			simpleLDA.performLDA(3000, 10);
+			
+			simpleLDA.readData(new File("Test/" + targetWord + ".txt"), true);
+			simpleLDA.performLDA(500, 10);
+			simpleLDA.saveResult();
+			
+			HashSet<Topic> topicsUsed = new HashSet<>();
+			for(Document document : simpleLDA.documents) {
+				//document.printProbsBesttopic();
+				topicsUsed.addAll(document.topicCountMap.keySet());
+			}
+			System.out.println("Topics used globally: " + topicsUsed.size());
+			System.out.println(topicsUsed);
 		}
 	}	
 }

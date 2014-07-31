@@ -12,6 +12,8 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import opennlp.tools.tokenize.Tokenizer;
 import opennlp.tools.tokenize.TokenizerME;
@@ -56,7 +58,7 @@ public class HDPGibbs {
 			topics.add(new Cluster(topicIDHandler.getID()));
 		}
 	}
-	
+
 	private void readData(File file, boolean test) {
 		int k, j;
 		Integer documentID = 0;
@@ -72,6 +74,7 @@ public class HDPGibbs {
 			String version = "null";
 			// parse input and generate the documents
 			while((oneLine = brdocuments.readLine()) != null) {
+
 				String documentString;
 				Document newdocument;
 				
@@ -84,9 +87,17 @@ public class HDPGibbs {
 				else {
 					newdocument = new Document(documentID++);	
 				}
+				if(oneLine == null)System.out.println("null");
+				String[] split = oneLine.split(" \\| ");
+				if(split.length < 2) continue;
 				
-				documentString = oneLine.split(" / ")[0];
-				documentString = documentString.split(" \\| ")[0];
+				documentString = split[1];
+				Integer index = documentString.indexOf("/");
+				
+				if(index == -1) continue;
+				documentString = documentString.substring(0, index); // BAG OF DEPENDENCIES
+				if(documentID % 500 == 0)System.out.println("reading: " + documentID);
+				//documentString = documentString.split(" / ")[0];
 				String[] wordStrings = tokenizer.tokenize(documentString);
 				newdocument.tables.add(new Cluster(tableIDHandler.getID()));
 				totalNumberOfTables++;
@@ -568,11 +579,11 @@ public class HDPGibbs {
 			
 			HDPGibbs hdp = new HDPGibbs();
 			hdp.readData(file, false);
-			hdp.run(30, 10);
+			hdp.run(3000, 10);
 			
 			
 			hdp.readData(new File("Test/" + targetWord + ".txt"), true);
-			hdp.run(30, 10);
+			hdp.run(500, 10);
 			hdp.saveResult();
 			
 			HashSet<Cluster> topicsUsed = new HashSet<>();
