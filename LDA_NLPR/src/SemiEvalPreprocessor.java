@@ -631,6 +631,7 @@ public class SemiEvalPreprocessor {
 		for(File file: textProcessor.files)
 			textProcessor.extractDependencyContexts(file);
 		*/
+		
 	}	
 	
 	
