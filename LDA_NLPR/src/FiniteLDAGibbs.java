@@ -13,6 +13,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
 
+
 import opennlp.tools.tokenize.Tokenizer;
 import opennlp.tools.tokenize.TokenizerME;
 import opennlp.tools.tokenize.TokenizerModel;
@@ -205,11 +206,16 @@ public class FiniteLDAGibbs {
 					else {
 						newdocument = new Document(documentID++);	
 					}
+					if(oneLine == null)System.out.println("null");
+					String[] split = oneLine.split(" \\| ");
+					//if(split.length < 2) continue;
 					
-					documentString = oneLine.split(" / ")[0];
-					documentString = documentString.split(" \\| ")[0];
-					//System.out.println(documentString);
-					//System.out.println(version);
+					documentString = split[0];
+					//Integer index = documentString.indexOf("/");
+					
+					//if(index == -1) continue;
+					//documentString = documentString.substring(0, index); // BAG OF DEPENDENCIES
+					if(documentID % 500 == 0)System.out.println("reading: " + documentID);
 					
 					
 					String[] wordStrings = tokenizer.tokenize(documentString);
@@ -439,12 +445,26 @@ public class FiniteLDAGibbs {
 		XMLparserTesting parser = new XMLparserTesting();
 		parser.files.clear();
 		parser.getFileNamesInFolder(new File("Train"));
+		HashMap<String, Integer> topicsGSA = new HashMap<>();
+		
+		BufferedReader brSenses;
+		try {
+			brSenses = new BufferedReader(new FileReader(new File("GSsenses/GSsenses.txt")));
+			String oneLine;
+			while((oneLine = brSenses.readLine()) != null) {
+				String[] split = oneLine.split(" ");
+				topicsGSA.put(split[0], Integer.parseInt(split[1]));
+			}
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		
 		for(File file : parser.files) {
 			String targetWord = file.getName().substring(file.getName().lastIndexOf("/") + 1, file.getName().lastIndexOf("."));
 			System.out.println(targetWord);
 			
-			FiniteLDAGibbs simpleLDA = new FiniteLDAGibbs(25);
+			FiniteLDAGibbs simpleLDA = new FiniteLDAGibbs(topicsGSA.get(targetWord));
 			simpleLDA.readData(file, false);
 			simpleLDA.performLDA(3000, 10);
 			
