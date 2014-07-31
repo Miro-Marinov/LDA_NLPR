@@ -74,6 +74,7 @@ public class HDPGibbs {
 			String version = "null";
 			// parse input and generate the documents
 			while((oneLine = brdocuments.readLine()) != null) {
+
 				String documentString;
 				Document newdocument;
 				
@@ -86,9 +87,11 @@ public class HDPGibbs {
 				else {
 					newdocument = new Document(documentID++);	
 				}
-				
+				if(oneLine == null)System.out.println("null");
 				documentString = oneLine.split(" \\| ")[1];
 				Integer index = documentString.indexOf("/");
+				
+				if(index == -1) continue;
 				documentString = documentString.substring(0, index); // BAG OF DEPENDENCIES
 				if(documentID % 500 == 0)System.out.println("reading: " + documentID);
 				//documentString = documentString.split(" / ")[0];
