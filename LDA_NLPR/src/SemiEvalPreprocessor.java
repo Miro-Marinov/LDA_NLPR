@@ -314,7 +314,8 @@ public class SemiEvalPreprocessor {
 		    
 		    
 			for (List<HasWord> sentence : new DocumentPreprocessor(file.getPath())){
-			System.out.println(sentenceCounter++);	
+			System.out.println(sentenceCounter++);
+			
 				graphMap.clear();
 				pathMap.clear();
 				prevMap.clear();
@@ -397,7 +398,7 @@ public class SemiEvalPreprocessor {
     	     }
     	     if(head.equals(nextStageMarker) && incr == false) incr = true;
     	     head = split[0];
-    	     
+    	     if(graphMap.get(head) == null) continue; // weird should never happen
     	     for (String i : graphMap.get(head)) {
     	        node = i.split(" ")[0];
     	    	
@@ -418,9 +419,12 @@ public class SemiEvalPreprocessor {
     	      allRepresentations.setLength(0);
 		      bagOfWords.setLength(0);
     	      bagOfDepend.setLength(0);
-		      
+    	      
     	      for(String i : pathMap.keySet()) {
-		    	  if(i.equals(targetWordNode) || i.contains("ROOT")) continue;
+		    	 
+    	    	  if(i.equals(targetWordNode) || i.contains("ROOT")) continue;
+		    	  if(i.matches("^[\\-]*\\d")) continue;
+		    	  i = i.trim().replaceFirst("^\\-", "");
 		    	  bagOfWords.append(i.split("-\\d")[0] + " ");
 		    	  bagOfDepend.append(pathMap.get(i) + " ");
 		      }
@@ -433,6 +437,8 @@ public class SemiEvalPreprocessor {
     	      
     	      for(String i : nearNodes) {
     	    	  if(i.equals(targetWordNode) || i.contains("ROOT")) continue;
+    	    	  if(i.matches("^[\\-]*\\d")) continue;
+    	    	  i = i.trim().replaceFirst("^\\-", "");
 		    	  bagOfWords.append(i.split("-\\d")[0] + " ");
 		    	  bagOfDepend.append(pathMap.get(i) + " ");
     	      }
@@ -605,13 +611,13 @@ public class SemiEvalPreprocessor {
 		//parser.getFileNamesInFolder(new File("SemiEval2010 xml"));
 		
 		
-		 XMLparser parser = new XMLparser();
+		XMLparserTesting parser = new XMLparserTesting();
 		parser.files = new ArrayList<>();
 		parser.getFileNamesInFolder(new File("SemiEval2010 xml"));
 		for(File file: parser.files)
 			parser.parse(file);	
 		
-		
+		/*
 		textProcessor.getFileNamesInFolder(new File("SemiEval2010 txt"));
 		
 		for(File file: textProcessor.files) {
@@ -619,12 +625,13 @@ public class SemiEvalPreprocessor {
 			textProcessor.extractClassicalContexts(file);
 		}
 		
-		/*
+		
 		textProcessor.files = new ArrayList<>();
 		textProcessor.getFileNamesInFolder(new File("SemiEval2010 rawSentencesTagged"));
 		for(File file: textProcessor.files)
 			textProcessor.extractDependencyContexts(file);
 		*/
+		
 	}	
 	
 	
