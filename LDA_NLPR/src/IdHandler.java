@@ -2,10 +2,10 @@ import java.util.PriorityQueue;
 
 
 public class IdHandler {
-	private static Integer curMaxID = 0;
-	private static PriorityQueue<Integer> freedIDs = new PriorityQueue<>();
+	private Integer curMaxID = 0;
+	private PriorityQueue<Integer> freedIDs = new PriorityQueue<>();
 
-	public static Integer getID() {
+	public Integer getID() {
 		if(freedIDs.isEmpty()) {
 			return curMaxID++;
 		}
@@ -14,7 +14,7 @@ public class IdHandler {
 		}
 	}
 	
-	public static void freeID(Integer ID) {
+	public void freeID(Integer ID) {
 		freedIDs.add(ID);
 	}
 }

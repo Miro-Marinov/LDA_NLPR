@@ -397,7 +397,7 @@ public class SemiEvalPreprocessor {
     	     }
     	     if(head.equals(nextStageMarker) && incr == false) incr = true;
     	     head = split[0];
-    	     
+    	     if(graphMap.get(head) == null) continue;
     	     for (String i : graphMap.get(head)) {
     	        node = i.split(" ")[0];
     	    	
@@ -421,6 +421,8 @@ public class SemiEvalPreprocessor {
 		      
     	      for(String i : pathMap.keySet()) {
 		    	  if(i.equals(targetWordNode) || i.contains("ROOT")) continue;
+		    	  if(i.matches("^[\\-]*\\d")) continue;
+		    	  i = i.trim().replaceFirst("^\\-", "");
 		    	  bagOfWords.append(i.split("-\\d")[0] + " ");
 		    	  bagOfDepend.append(pathMap.get(i) + " ");
 		      }
@@ -433,6 +435,8 @@ public class SemiEvalPreprocessor {
     	      
     	      for(String i : nearNodes) {
     	    	  if(i.equals(targetWordNode) || i.contains("ROOT")) continue;
+    	    	  if(i.matches("^[\\-]*\\d")) continue;
+    	    	  i = i.trim().replaceFirst("^\\-", "");
 		    	  bagOfWords.append(i.split("-\\d")[0] + " ");
 		    	  bagOfDepend.append(pathMap.get(i) + " ");
     	      }
@@ -605,13 +609,13 @@ public class SemiEvalPreprocessor {
 		//parser.getFileNamesInFolder(new File("SemiEval2010 xml"));
 		
 		
-		 XMLparser parser = new XMLparser();
+		XMLparserTesting parser = new XMLparserTesting();
 		parser.files = new ArrayList<>();
 		parser.getFileNamesInFolder(new File("SemiEval2010 xml"));
 		for(File file: parser.files)
 			parser.parse(file);	
 		
-		
+		/*
 		textProcessor.getFileNamesInFolder(new File("SemiEval2010 txt"));
 		
 		for(File file: textProcessor.files) {
@@ -619,7 +623,7 @@ public class SemiEvalPreprocessor {
 			textProcessor.extractClassicalContexts(file);
 		}
 		
-		/*
+		
 		textProcessor.files = new ArrayList<>();
 		textProcessor.getFileNamesInFolder(new File("SemiEval2010 rawSentencesTagged"));
 		for(File file: textProcessor.files)
