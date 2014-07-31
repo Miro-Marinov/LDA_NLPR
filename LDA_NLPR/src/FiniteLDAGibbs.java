@@ -216,8 +216,6 @@ public class FiniteLDAGibbs {
 					//if(index == -1) continue;
 					//documentString = documentString.substring(0, index); // BAG OF DEPENDENCIES
 					if(documentID % 500 == 0)System.out.println("reading: " + documentID);
-					
-					
 					String[] wordStrings = tokenizer.tokenize(documentString);
 					newdocument = new Document(documentID++, version);
 					// parse all the strings for a document
