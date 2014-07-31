@@ -10,7 +10,7 @@ import java.io.FileWriter;
 import java.util.ArrayList;
 import java.util.List;
 
-public class XMLparser {
+public class XMLparserTesting {
     List<File> files = new ArrayList<>();
 
 	public void parse(List<File> files) {		
@@ -52,11 +52,16 @@ public class XMLparser {
 				
 				for (int child = 0; child < childList.getLength(); child ++) {
 					Node cNode = childList.item(child);
-					contextList.contexts.add(cNode.getTextContent());	
-					
-					bw.write(cNode.getTextContent());
-					bw.newLine();
-					bw.flush();
+					NodeList cchildList = cNode.getChildNodes();
+					for (int cChild = 0; cChild < cchildList.getLength(); cChild ++) {
+						Node ccNode = cchildList.item(cChild);
+						if(ccNode.getBaseURI() != null) {
+						contextList.contexts.add(ccNode.getTextContent());	
+						bw.write(ccNode.getTextContent());
+						bw.newLine();
+						bw.flush();
+						}
+					}
 				}
 			}
 			bw.close();
@@ -79,7 +84,7 @@ public class XMLparser {
 	
 
 	public static void main(String[] args){
-		XMLparser parser = new XMLparser();
+		XMLparserTesting parser = new XMLparserTesting();
 		//parser.getFileNamesInFolder(new File("SemiEval2010 xml"));
 		
 		parser.files = new ArrayList<>();
