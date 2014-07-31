@@ -88,8 +88,9 @@ public class HDPGibbs {
 				}
 				
 				documentString = oneLine.split(" \\| ")[1];
-				documentString = documentString.split(" / ")[0]; // BAG OF DEPENDENCIES
-				System.out.println(documentString);
+				Integer index = documentString.indexOf("/");
+				documentString = documentString.substring(0, index); // BAG OF DEPENDENCIES
+				//documentString = documentString.split(" / ")[0];
 				String[] wordStrings = tokenizer.tokenize(documentString);
 				newdocument.tables.add(new Cluster(tableIDHandler.getID()));
 				totalNumberOfTables++;
