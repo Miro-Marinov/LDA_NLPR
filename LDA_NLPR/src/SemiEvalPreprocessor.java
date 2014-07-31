@@ -314,7 +314,8 @@ public class SemiEvalPreprocessor {
 		    
 		    
 			for (List<HasWord> sentence : new DocumentPreprocessor(file.getPath())){
-			System.out.println(sentenceCounter++);	
+			System.out.println(sentenceCounter++);
+			
 				graphMap.clear();
 				pathMap.clear();
 				prevMap.clear();
@@ -397,7 +398,7 @@ public class SemiEvalPreprocessor {
     	     }
     	     if(head.equals(nextStageMarker) && incr == false) incr = true;
     	     head = split[0];
-    	     if(graphMap.get(head) == null) continue;
+    	     if(graphMap.get(head) == null) continue; // weird should never happen
     	     for (String i : graphMap.get(head)) {
     	        node = i.split(" ")[0];
     	    	
@@ -418,9 +419,10 @@ public class SemiEvalPreprocessor {
     	      allRepresentations.setLength(0);
 		      bagOfWords.setLength(0);
     	      bagOfDepend.setLength(0);
-		      
+    	      
     	      for(String i : pathMap.keySet()) {
-		    	  if(i.equals(targetWordNode) || i.contains("ROOT")) continue;
+		    	 
+    	    	  if(i.equals(targetWordNode) || i.contains("ROOT")) continue;
 		    	  if(i.matches("^[\\-]*\\d")) continue;
 		    	  i = i.trim().replaceFirst("^\\-", "");
 		    	  bagOfWords.append(i.split("-\\d")[0] + " ");
