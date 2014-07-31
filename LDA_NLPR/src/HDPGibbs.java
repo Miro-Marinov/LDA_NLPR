@@ -12,6 +12,8 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import opennlp.tools.tokenize.Tokenizer;
 import opennlp.tools.tokenize.TokenizerME;
@@ -56,7 +58,7 @@ public class HDPGibbs {
 			topics.add(new Cluster(topicIDHandler.getID()));
 		}
 	}
-	
+
 	private void readData(File file, boolean test) {
 		int k, j;
 		Integer documentID = 0;
@@ -85,8 +87,9 @@ public class HDPGibbs {
 					newdocument = new Document(documentID++);	
 				}
 				
-				documentString = oneLine.split(" / ")[0];
-				documentString = documentString.split(" \\| ")[1]; // BAG OF DEPENDENCIES
+				documentString = oneLine.split(" \\| ")[1];
+				documentString = documentString.split(" / ")[0]; // BAG OF DEPENDENCIES
+				System.out.println(documentString);
 				String[] wordStrings = tokenizer.tokenize(documentString);
 				newdocument.tables.add(new Cluster(tableIDHandler.getID()));
 				totalNumberOfTables++;
