@@ -568,11 +568,11 @@ public class HDPGibbs {
 			
 			HDPGibbs hdp = new HDPGibbs();
 			hdp.readData(file, false);
-			hdp.run(30, 10);
+			hdp.run(3000, 10);
 			
 			
 			hdp.readData(new File("Test/" + targetWord + ".txt"), true);
-			hdp.run(30, 10);
+			hdp.run(500, 10);
 			hdp.saveResult();
 			
 			HashSet<Cluster> topicsUsed = new HashSet<>();
