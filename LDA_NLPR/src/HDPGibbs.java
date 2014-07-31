@@ -1,7 +1,10 @@
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -16,12 +19,12 @@ import opennlp.tools.tokenize.TokenizerModel;
 
 public class HDPGibbs {
     
-	private static boolean dbg = false;
+	//private static boolean dbg = false;
 	String targetWord;
 	Random randGen;
-	private double beta  = 0.5; 
-	private double gamma = 0.5; //topics
-	private double alpha = 0.5; //table
+	private double beta  = 0.5; //0.5
+	private double gamma = 1.0; //topics 1.0
+	private double alpha = 1.5; //table 1.5
 	private List<Double> p = new ArrayList<>(); 
 	private List<Double> f = new ArrayList<>(); 
 	
@@ -54,24 +57,37 @@ public class HDPGibbs {
 		}
 	}
 	
-	private void readData(File file) {
+	private void readData(File file, boolean test) {
 		int k, j;
 		Integer documentID = 0;
 		documents.clear();
+		if(test) System.out.println("Reading testing data");
+		else System.out.println("Reading training data");
 		try {	
-			String targetWord = file.getName().substring(0, file.getName().indexOf("."));
+			targetWord = file.getName().substring(0, file.getName().indexOf("."));
 			BufferedReader brdocuments = new BufferedReader(new FileReader(file));
 			String oneLine;
 			FileInputStream modelFileToken    = new FileInputStream("models/en-token.bin");
 			Tokenizer tokenizer = new TokenizerME(new TokenizerModel(modelFileToken));
-			
+			String version = "null";
 			// parse input and generate the documents
 			while((oneLine = brdocuments.readLine()) != null) {
+				String documentString;
+				Document newdocument;
 				
-				String documentString = oneLine.split(" / ")[0];
+				if(test) {
+				String[] split = oneLine.split(" \\|\\| ");
+				oneLine = split[1];
+				version = split[0];
+				newdocument = new Document(documentID++, version);
+				}
+				else {
+					newdocument = new Document(documentID++);	
+				}
+				
+				documentString = oneLine.split(" / ")[0];
 				documentString = documentString.split(" \\| ")[0];
 				String[] wordStrings = tokenizer.tokenize(documentString);
-				Document newdocument = new Document(documentID++);	
 				newdocument.tables.add(new Cluster(tableIDHandler.getID()));
 				totalNumberOfTables++;
 				documents.add(newdocument);
@@ -175,6 +191,11 @@ public class HDPGibbs {
 	
 		}
 		
+		@Override
+	    public String toString() {
+	    	return "clr(" + id + ")";
+	    }
+		
 		
 		public Integer size() {
 			return words.size();
@@ -182,19 +203,39 @@ public class HDPGibbs {
 	}
 	
 		class Document {
-			int id;
+			final int id;
 			List<Cluster> tables;
 			HashMap<Cluster, Cluster> tableToTopic;
 			HashMap<Cluster, Integer> topicCountMap;
 			List<Word> words;
+		    final String version;
 			
-			public Document(int id) {
+			public Document(int id, String version) {
 				this.id = id;
+				this.version = version;
 			    words = new ArrayList<>();	
 			    tableToTopic = new HashMap<>();
 			    topicCountMap = new HashMap<>();
 			    tables = new ArrayList<>();
+			    
+			   
 			}
+			
+			public Document(int id) {
+				this.id = id;
+				version = "null";
+			    words = new ArrayList<>();	
+			    tableToTopic = new HashMap<>();
+			    topicCountMap = new HashMap<>();
+			    tables = new ArrayList<>();
+			    
+			   
+			}
+			
+			@Override
+		    public String toString() {
+		    	return "doc(" + id + ")";
+		    }
 			
 			public void printProbsBesttopic() {
 				
@@ -208,8 +249,8 @@ public class HDPGibbs {
 				System.out.println("Document is: " + id );
 				for(Cluster topic: topicCountMap.keySet()) {
 					Double topicProb = (double)topicCountMap.get(topic)/(double)normalizingConstant;
-					System.out.println("Topic: " + topic.id + " times used is:" + topicCountMap.get(topic));
-					System.out.println("Topic: " + topic.id + " prob is:" + topicProb);
+					System.out.println("Topic: " + topic + " times used is:" + topicCountMap.get(topic));
+					System.out.println("Topic: " + topic + " prob is:" + topicProb);
 					if( topicProb > bestProb) {
 						bestProb = topicProb;
 						besttopic = topic;
@@ -245,7 +286,7 @@ public class HDPGibbs {
 					topicID = -1;
 					tableID = -1;
 				}
-				return wordString + "(d:" + document.id + " tbl:" + tableID + " tpc:" + topicID + ")";
+				return wordString + "(d:" + document + " tbl:" + tableID + " tpc:" + topicID + ")";
 			}
 		 }
 		
@@ -347,7 +388,7 @@ public class HDPGibbs {
 				}
 				p.add(pSum);
 			}
-			pSum += alpha * fNew / (totalNumberOfTables + gamma); // Probability for t = tNew
+			pSum += alpha * fNew / (totalNumberOfTables + gamma); // Probability for new Table
 			p.add(pSum);
 			r = randGen.nextDouble() * pSum;
 			
@@ -398,8 +439,11 @@ public class HDPGibbs {
 			topic.remove(word); //wordCountByTopic[k]--; 	
 			
 			Integer topicCount = document.topicCountMap.get(topic);
-			if(topicCount != null && topicCount != 0)
+			if(topicCount != null && topicCount != 0) {
 				document.topicCountMap.put(topic, topicCount - 1);
+			if(topicCount == 1)
+					document.topicCountMap.remove(topic);
+			}
 			
 			// remove table from the table collection if needed
 			if(table.size() <= 0) {
@@ -452,7 +496,7 @@ public class HDPGibbs {
 		System.out.println("Documents outlook:");
 		for(Document document : documents) {
 			count += document.words.size();
-			System.out.println("\nDocument " + document.id + " (" + document.words.size() + ")");
+			System.out.println("\nDocument " + document + " (" + document.words.size() + ")");
 			System.out.println(document.words.toString());
 			System.out.println("DocTables(" + document.tables.size() + ")");
 			for(Cluster table : document.tables)
@@ -463,22 +507,85 @@ public class HDPGibbs {
 		System.out.println("Number of tables: " + totalNumberOfTables);
 	}
 	
+	private void saveResult() {
+		 File outFileResult = new File("output/" + targetWord + ".txt");		
+			if (outFileResult.exists()) {
+				outFileResult.delete();
+			}
+			
+		 try {
+			 outFileResult.createNewFile();
+			 BufferedWriter bwResult = new BufferedWriter(new FileWriter(outFileResult));
+		
+		//absorb.v absorb.v.2 absorb.cluster.1/0.8 absorb.cluster.2/0.2
+	    StringBuilder toWrite = new StringBuilder();
+		for(Document doc : documents) {
+			Integer normalizingConstant = 0;
+			toWrite.setLength(0);
+			toWrite.append(doc.version.split(".\\d")[0] + " ");
+			toWrite.append(doc.version);
+			for(Integer value: doc.topicCountMap.values()) {
+				normalizingConstant += value;
+			}
+			Cluster besttopic = null;
+			Double bestProb = Double.NEGATIVE_INFINITY;
+			System.out.println("Document is: " + doc.id );
+			for(Cluster topic: doc.topicCountMap.keySet()) {
+				Double topicProb = (double)doc.topicCountMap.get(topic)/(double)normalizingConstant;
+				System.out.println("Topic: " + topic + " times used is:" + doc.topicCountMap.get(topic));
+				System.out.println("Topic: " + topic + " prob is:" + topicProb);
+				if( topicProb > bestProb) {
+					bestProb = topicProb;
+					besttopic = topic;
+				}
+				toWrite.append(" " + targetWord + ".cluster" + "." + topic.id + "/" + topicProb);
+			}
+			bwResult.write(toWrite.toString());
+			bwResult.newLine();
+			bwResult.flush();
+			System.out.print("For document" + doc.id + " best topic is: " + besttopic.id + " with prob: " + bestProb);
+			System.out.println();
+		}
+		
+		bwResult.close();
+	 } catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+
 	
 	// perform HDP on the collection of documents
 	public static void main(String[] args) {
-		HDPGibbs hdp = new HDPGibbs();
-		hdp.readData(new File("testHDP/cheat.txt"));
-		hdp.run(100, 10);
 		
-		//hdp.printTopics();
-		hdp.readData(new File("testHDPtest/cheat.txt"));
-		hdp.run(100, 10);
-		hdp.printTopics();
-		hdp.printDocuments();
+		XMLparserTesting parser = new XMLparserTesting();
+		parser.files.clear();
+		parser.getFileNamesInFolder(new File("Train"));
 		
-		for(Document document : hdp.documents) {
-			document.printProbsBesttopic();
+		for(File file : parser.files) {
+			String targetWord = file.getName().substring(file.getName().lastIndexOf("/") + 1, file.getName().lastIndexOf("."));
+			System.out.println(targetWord);
+			
+			HDPGibbs hdp = new HDPGibbs();
+			hdp.readData(file, false);
+			hdp.run(30, 10);
+			
+			
+			hdp.readData(new File("Test/" + targetWord + ".txt"), true);
+			hdp.run(30, 10);
+			hdp.saveResult();
+			
+			HashSet<Cluster> topicsUsed = new HashSet<>();
+			for(Document document : hdp.documents) {
+				//document.printProbsBesttopic();
+				topicsUsed.addAll(document.topicCountMap.keySet());
+			}
+			
+			System.out.println("Topics used globally: " + topicsUsed.size());
+			System.out.println(topicsUsed);
 		}
+		
+		
 		
 	}	
 }

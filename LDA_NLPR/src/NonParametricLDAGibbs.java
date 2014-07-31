@@ -6,11 +6,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Hashtable;
 import java.util.List;
-import java.util.PriorityQueue;
 import java.util.Random;
-import java.util.TreeSet;
 
 import opennlp.tools.tokenize.Tokenizer;
 import opennlp.tools.tokenize.TokenizerME;
@@ -118,8 +115,7 @@ public class NonParametricLDAGibbs {
 	}
 	private static boolean dbg = false;
 
-	private final Integer iter = 3000;
-	public static final Integer K = 25; // max (initial) number of topics
+	public static final Integer K = 1; // max (initial) number of topics
     private  Integer N; // total number of words across all documents
     private  Integer B; // total number of unique words across all documents
     List<Topic> topics;
@@ -156,11 +152,14 @@ public class NonParametricLDAGibbs {
 			String targetWord = file.getName().substring(0, file.getName().indexOf("."));
 			BufferedReader brdocuments = new BufferedReader(new FileReader(file));
 			if(dbg)System.out.println("\n\nRarget word is " + targetWord);
-			String documentString;
+			String oneLine;
 			FileInputStream modelFileToken    = new FileInputStream("models/en-token.bin");
 			Tokenizer tokenizer = new TokenizerME(new TokenizerModel(modelFileToken));
 			// parse documents
-			while((documentString = brdocuments.readLine()) != null) {	// for each document
+			while((oneLine = brdocuments.readLine()) != null) {	// for each document
+				
+				String documentString = oneLine.split(" / ")[0];
+				documentString = documentString.split(" \\| ")[0];
 				String[] wordStrings = tokenizer.tokenize(documentString);
 				Document newdocument = new Document(documentString, documentID++);
 				// parse word strings in a document
@@ -208,6 +207,9 @@ public class NonParametricLDAGibbs {
 
 		if(topicCount != null && topicCount != 0)
 			document.topicCountMap.put(topic, topicCount - 1);
+			if(topicCount == 1) {
+				document.topicCountMap.remove(topic);
+			}
 		}
 	}
 	// put a word in a topic
@@ -223,10 +225,11 @@ public class NonParametricLDAGibbs {
 	}
 
 	// performs LDA
-	public void performLDA() {
+	public void performLDA(Integer iter, Integer shuffleLag) {
 		System.out.println("Gibbs sampling: ");
 		for(int i = 0 ; i < iter; i++) {
-			if(i % 1000 == 0) System.out.println("ITER: " + i);
+			if ((shuffleLag > 0) && (i > 0) && (i % shuffleLag == 0))
+				doShuffle();
 			for(Document document : documents) {
 				if(dbg)System.out.println("In document: " + document.toString());
 				for(Word word : document.words) {
@@ -242,10 +245,21 @@ public class NonParametricLDAGibbs {
 						}
 					}
 				}
+			System.out.println("iter = " + i + " #topics = " + topics.size());
 			}
 		 printtopics();	
 	}
 
+	/**
+	 * Permute the ordering of documents and words in the bookkeeping (initiated from time to time)
+	 */
+	protected void doShuffle() {
+		Collections.shuffle(documents);
+		for (Document d : documents){
+			Collections.shuffle(d.words);
+		}
+	}	
+	
 	private void printtopics() {
 		int count = 0;
 		System.out.println("\n\ntopics outlook:\n\n");
@@ -269,8 +283,8 @@ public class NonParametricLDAGibbs {
 
 	private void gibbsEstimate(Word word) {
 			Document document = word.document;
-			List<Double> probs = new ArrayList<>(); 
-			Double normConst = 0.;
+			Double pSum = .0;
+			List<Double> p = new ArrayList<>();
 			if(dbg)System.out.println("Calculating probabilities: ");
 			for(Topic topic : topics) {
 				Integer timestopicUsedFordocument = document.topicCountMap.get(topic);
@@ -290,9 +304,8 @@ public class NonParametricLDAGibbs {
 				}
 				// probability for existing topics
 				double prob = term1 * term2;
-				probs.add(prob);
-				
-				normConst += prob;
+				pSum += prob;
+				p.add(pSum);
 			}
 			//probability for a new topic
 			double term1 = ((double)(alpha)) / (double)(document.words.size() - 1 + alpha);
@@ -304,25 +317,21 @@ public class NonParametricLDAGibbs {
 			}
 			
 			double prob = term1 * term2;
-			probs.add(term1 * term2);
-			normConst += prob;
-			// normalize probabilities
-			probs = normalize(probs, normConst);
-			// sample a new topic
-			Integer newCluserIndex = sample(probs);
-			// if assigned to existing topic: just put the word in that topic
-			if(newCluserIndex != probs.size()-1)
-				putWord (word, topics.get(newCluserIndex));
-			// otherwise:
-			else {
-				// create a new topic
-				Topic newtopic = new Topic();
-				// add it to the topics list
-				topics.add(newtopic);
-				// add the word in the new topic
-				putWord (word, newtopic);
+			pSum += prob;
+			p.add(pSum);
+			Double r = randGen.nextDouble() * pSum;
+			int j;
+			for (j = 0; j <= topics.size(); j++)
+				if (r < p.get(j)) 
+					break;	// decided which table the word i is assigned to
+			if( j == topics.size()) {
+				Topic newTopic = new Topic();
+				topics.add(newTopic);
+				putWord(word, newTopic);
 			}
-			if(dbg)System.out.println();
+			else {
+				putWord(word, topics.get(j));
+			}
 	}
 
 
@@ -369,8 +378,8 @@ public class NonParametricLDAGibbs {
 	}
 	// perform LDA on the collection of documents
 	public static void main(String[] args) {
-		NonParametricLDAGibbs infLDA = new NonParametricLDAGibbs(new File("SemiEval2010 sentencedocuments/absorb.txt"));
-		infLDA.performLDA();
+		NonParametricLDAGibbs infLDA = new NonParametricLDAGibbs(new File("testHDP/cheat.txt"));
+		infLDA.performLDA(200, 10);
 		for(Document document : infLDA.documents) {
 			document.printProbsBesttopic();
 		}
