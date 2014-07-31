@@ -208,13 +208,13 @@ public class FiniteLDAGibbs {
 					}
 					if(oneLine == null)System.out.println("null");
 					String[] split = oneLine.split(" \\| ");
-					//if(split.length < 2) continue;
+					if(split.length < 2) continue;
 					
-					documentString = split[0];
-					//Integer index = documentString.indexOf("/");
+					documentString = split[1];
+					Integer index = documentString.indexOf("/");
 					
-					//if(index == -1) continue;
-					//documentString = documentString.substring(0, index); // BAG OF DEPENDENCIES
+					if(index == -1) continue;
+					documentString = documentString.substring(0, index); // BAG OF DEPENDENCIES
 					if(documentID % 500 == 0)System.out.println("reading: " + documentID);
 					String[] wordStrings = tokenizer.tokenize(documentString);
 					// parse all the strings for a document
